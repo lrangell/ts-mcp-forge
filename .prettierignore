@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+coverage/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Config files that shouldn't be formatted
+pnpm-lock.yaml
+package-lock.json

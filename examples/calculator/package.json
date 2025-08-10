@@ -1,0 +1,11 @@
+{
+  "name": "calculator-mcp-server",
+  "version": "1.0.0",
+  "description": "Example MCP Calculator Server",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --loader tsx server.ts",
+    "inspect": "npx @modelcontextprotocol/inspector node --loader tsx server.ts"
+  }
+}
