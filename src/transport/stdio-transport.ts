@@ -10,4 +10,3 @@ export class StdioTransport {
     process.exit(0);
   }
 }
-

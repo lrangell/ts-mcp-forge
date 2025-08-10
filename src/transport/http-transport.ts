@@ -30,7 +30,8 @@ export class HTTPTransport {
 
     // Register CORS if enabled
     if (this.options.cors) {
-      await this.app.register(FastifyCors, 
+      await this.app.register(
+        FastifyCors,
         typeof this.options.cors === 'object' ? this.options.cors : {}
       );
     }
@@ -44,7 +45,9 @@ export class HTTPTransport {
         port: this.options.port!,
         host: this.options.host!,
       });
-      console.log(`HTTP MCP Server listening on http://${this.options.host}:${this.options.port}${this.options.path}`);
+      console.log(
+        `HTTP MCP Server listening on http://${this.options.host}:${this.options.port}${this.options.path}`
+      );
     } catch (error) {
       console.error('Failed to start HTTP server:', error);
       throw error;

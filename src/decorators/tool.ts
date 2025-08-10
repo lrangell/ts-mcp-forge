@@ -4,21 +4,22 @@ import { setToolMetadata, getParamMetadata } from './metadata.js';
 export function Tool(description: string): MethodDecorator;
 export function Tool(name: string, description: string): MethodDecorator;
 
-export function Tool(nameOrDescription: string, description?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+export function Tool(nameOrDescription: string, description?: string): MethodDecorator {
+  return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+    const methodName = typeof propertyKey === 'symbol' ? propertyKey.toString() : propertyKey;
     const hasExplicitName = description !== undefined;
-    const toolName = hasExplicitName ? nameOrDescription : propertyKey;
+    const toolName = hasExplicitName ? nameOrDescription : methodName;
     const toolDescription = hasExplicitName ? description : nameOrDescription;
 
     const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
     const returnType = Reflect.getMetadata('design:returntype', target, propertyKey);
 
-    const params = getParamMetadata(target, propertyKey) || [];
+    const params = getParamMetadata(target, methodName) || [];
 
-    setToolMetadata(target, propertyKey, {
+    setToolMetadata(target, methodName, {
       name: toolName,
       description: toolDescription,
-      method: propertyKey,
+      method: methodName,
       paramTypes,
       returnType,
       params,

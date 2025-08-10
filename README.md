@@ -26,30 +26,31 @@ yarn add ts-mcp-forge
 ## Quick Start
 
 ```typescript
-import { MCPServer, Tool, Param } from 'ts-mcp-forge';
-import { Result, ok, err } from 'neverthrow';
+import { MCPServer, Tool, Param, StdioTransport } from 'ts-mcp-forge';
+import { Result, ok } from 'neverthrow';
 
 class MyServer extends MCPServer {
   constructor() {
     super('My MCP Server', '1.0.0');
   }
 
-  // Method name as tool name (new!)
+  // Method name as tool name
   @Tool('Greets a person by name')
   greet(@Param('Name of the person') name: string): Result<string, string> {
     return ok(`Hello, ${name}!`);
   }
 
-  // Custom tool name (original pattern)
+  // Custom tool name
   @Tool('say-goodbye', 'Says goodbye to a person')
   farewell(@Param('Name of the person') name: string): Result<string, string> {
     return ok(`Goodbye, ${name}!`);
   }
 }
 
-// Start the server
+// Start the server with stdio transport
 const server = new MyServer();
-// Use with your preferred transport (stdio, SSE, HTTP)
+const transport = new StdioTransport();
+await transport.start(server);
 ```
 
 ## Core Concepts
@@ -61,19 +62,13 @@ Tools are functions that can be called by MCP clients. You can define them with 
 ```typescript
 // Using method name as tool name
 @Tool('Performs a calculation')
-calculate(
-  @Param('First number') a: number,
-  @Param('Second number') b: number
-): Result<number, string> {
+calculate(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
   return ok(a + b);
 }
 
 // Using custom tool name
 @Tool('add-numbers', 'Adds two numbers')
-calculate(
-  @Param('First number') a: number,
-  @Param('Second number') b: number
-): Result<number, string> {
+calculate(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
   return ok(a + b);
 }
 ```
@@ -95,9 +90,7 @@ Prompts are templates that can be filled by MCP clients:
 
 ```typescript
 @Prompt('code-review', 'Template for code review')
-codeReviewPrompt(
-  @Param('Programming language') language: string
-): Result<string, string> {
+codeReviewPrompt(@Param('Programming language') language: string): Result<string, string> {
   return ok(`Review this ${language} code for best practices...`);
 }
 ```
@@ -114,9 +107,7 @@ class ValidationError extends Error {
 }
 
 @Tool('validateEmail', 'Validates an email address')
-validateEmail(
-  @Param('Email address') email: string
-): Result<boolean, ValidationError> {
+validateEmail(@Param('Email address') email: string): Result<boolean, ValidationError> {
   if (!email.includes('@')) {
     return err(new ValidationError('email', 'Invalid email format'));
   }
@@ -128,9 +119,7 @@ validateEmail(
 
 ```typescript
 @Tool('fetchData', 'Fetches data from API')
-async fetchData(
-  @Param('API endpoint') endpoint: string
-): Promise<Result<any, string>> {
+async fetchData(@Param('API endpoint') endpoint: string): Promise<Result<any, string>> {
   try {
     const response = await fetch(endpoint);
     const data = await response.json();
@@ -146,19 +135,37 @@ async fetchData(
 #### Standard I/O (for CLI tools)
 
 ```typescript
-import { StdioTransport } from 'ts-mcp-forge/transport';
+import { MCPServer, StdioTransport } from 'ts-mcp-forge';
 
+const server = new MyServer();
 const transport = new StdioTransport();
-await transport.start(new MyServer());
+await transport.start(server);
 ```
 
 #### Server-Sent Events (for web apps)
 
 ```typescript
-import { SSETransport } from 'ts-mcp-forge/transport';
+import { MCPServer, SSETransport } from 'ts-mcp-forge';
 
-const transport = new SSETransport({ port: 3000 });
-await transport.start(new MyServer());
+const server = new MyServer();
+const transport = new SSETransport({
+  port: 3000,
+  host: 'localhost',
+});
+await transport.start(server);
+```
+
+#### HTTP/REST (for RESTful APIs)
+
+```typescript
+import { MCPServer, HTTPTransport } from 'ts-mcp-forge';
+
+const server = new MyServer();
+const transport = new HTTPTransport({
+  port: 3000,
+  host: '0.0.0.0',
+});
+await transport.start(server);
 ```
 
 ## API Reference
@@ -179,10 +186,3 @@ await transport.start(new MyServer());
 - `callTool(name, args)` - Executes a tool
 - `readResource(uri)` - Reads a resource
 - `getPrompt(name, args)` - Gets a prompt
-
-## Examples
-
-Check out the [examples](./examples) directory for complete working examples:
-
-- [Calculator Server](./examples/calculator) - Basic arithmetic operations
-- More examples coming soon!
