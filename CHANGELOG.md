@@ -4,7 +4,7 @@
 
 ### Features
 
-* make Tool decorator name parameter optional ([962de69](https://github.com/lrangell/ts-mcp-forge/commit/962de690763e64c019beb5c6214c1591cfcd2347))
+- make Tool decorator name parameter optional ([962de69](https://github.com/lrangell/ts-mcp-forge/commit/962de690763e64c019beb5c6214c1591cfcd2347))
 
 ## 0.2.0 (2025-08-10)
 
