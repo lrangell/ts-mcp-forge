@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.2.0...v0.3.0) (2025-08-10)
+
+### Features
+
+* make Tool decorator name parameter optional ([962de69](https://github.com/lrangell/ts-mcp-forge/commit/962de690763e64c019beb5c6214c1591cfcd2347))
+
 ## 0.2.0 (2025-08-10)
 
 ### Features
