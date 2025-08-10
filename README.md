@@ -132,7 +132,7 @@ async fetchData(@Param('API endpoint') endpoint: string): Promise<Result<any, st
 
 ### Using with Different Transports
 
-#### Standard I/O (for CLI tools)
+#### Standard I/O
 
 ```typescript
 import { MCPServer, StdioTransport } from 'ts-mcp-forge';
@@ -142,7 +142,7 @@ const transport = new StdioTransport();
 await transport.start(server);
 ```
 
-#### Server-Sent Events (for web apps)
+#### Server-Sent Events
 
 ```typescript
 import { MCPServer, SSETransport } from 'ts-mcp-forge';
@@ -155,7 +155,7 @@ const transport = new SSETransport({
 await transport.start(server);
 ```
 
-#### HTTP/REST (for RESTful APIs)
+#### HTTP/REST
 
 ```typescript
 import { MCPServer, HTTPTransport } from 'ts-mcp-forge';
