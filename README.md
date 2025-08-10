@@ -34,10 +34,16 @@ class MyServer extends MCPServer {
     super('My MCP Server', '1.0.0');
   }
 
-  @Tool('greet', 'Greets a person by name')
+  // Method name as tool name (new!)
+  @Tool('Greets a person by name')
   greet(@Param('Name of the person') name: string): Result<string, string> {
-    // Validation is done at the router level, so we know that name exists
     return ok(`Hello, ${name}!`);
+  }
+
+  // Custom tool name (original pattern)
+  @Tool('say-goodbye', 'Says goodbye to a person')
+  farewell(@Param('Name of the person') name: string): Result<string, string> {
+    return ok(`Goodbye, ${name}!`);
   }
 }
 
@@ -50,10 +56,20 @@ const server = new MyServer();
 
 ### Tools
 
-Tools are functions that can be called by MCP clients:
+Tools are functions that can be called by MCP clients. You can define them with or without explicit names:
 
 ```typescript
-@Tool('calculate', 'Performs a calculation')
+// Using method name as tool name
+@Tool('Performs a calculation')
+calculate(
+  @Param('First number') a: number,
+  @Param('Second number') b: number
+): Result<number, string> {
+  return ok(a + b);
+}
+
+// Using custom tool name
+@Tool('add-numbers', 'Adds two numbers')
 calculate(
   @Param('First number') a: number,
   @Param('Second number') b: number

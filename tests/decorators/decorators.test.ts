@@ -12,7 +12,7 @@ import {
 
 describe('Decorators', () => {
   describe('@Tool decorator', () => {
-    it('should store tool metadata', () => {
+    it('should store tool metadata with explicit name', () => {
       class TestServer {
         @Tool('test-tool', 'A test tool')
         testMethod(): string {
@@ -25,6 +25,43 @@ describe('Decorators', () => {
       expect(metadata?.name).toBe('test-tool');
       expect(metadata?.description).toBe('A test tool');
       expect(metadata?.method).toBe('testMethod');
+    });
+
+    it('should use method name when name is not provided', () => {
+      class TestServer {
+        @Tool('A simple test tool')
+        testMethod(): string {
+          return 'test';
+        }
+      }
+
+      const metadata = getToolMetadata(TestServer.prototype, 'testMethod');
+      expect(metadata).toBeDefined();
+      expect(metadata?.name).toBe('testMethod');
+      expect(metadata?.description).toBe('A simple test tool');
+      expect(metadata?.method).toBe('testMethod');
+    });
+
+    it('should support both patterns in the same class', () => {
+      class TestServer {
+        @Tool('Multiplies two numbers')
+        multiply(a: number, b: number): number {
+          return a * b;
+        }
+
+        @Tool('custom-divide', 'Divides two numbers')
+        divide(a: number, b: number): number {
+          return a / b;
+        }
+      }
+
+      const multiplyMeta = getToolMetadata(TestServer.prototype, 'multiply');
+      expect(multiplyMeta?.name).toBe('multiply');
+      expect(multiplyMeta?.description).toBe('Multiplies two numbers');
+
+      const divideMeta = getToolMetadata(TestServer.prototype, 'divide');
+      expect(divideMeta?.name).toBe('custom-divide');
+      expect(divideMeta?.description).toBe('Divides two numbers');
     });
 
     it('should capture parameter types', () => {

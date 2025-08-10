@@ -4,7 +4,7 @@
 
 ### Features
 
-* initial release of ts-mcp-forge ([34ad100](https://github.com/lrangell/ts-mcp-forge/commit/34ad10087e25b476c25e5e8194746f4722ffd179))
+- initial release of ts-mcp-forge ([34ad100](https://github.com/lrangell/ts-mcp-forge/commit/34ad10087e25b476c25e5e8194746f4722ffd179))
 
 All notable changes to this project will be documented in this file.
 

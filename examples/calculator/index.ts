@@ -9,7 +9,7 @@ export class CalculatorServer extends MCPServer {
     super('Calculator Server', '1.0.0');
   }
 
-  @Tool('add', 'Adds two numbers together')
+  @Tool('Adds two numbers together')
   add(
     @Param('First number to add') a: number,
     @Param('Second number to add') b: number
@@ -17,7 +17,7 @@ export class CalculatorServer extends MCPServer {
     return ok(a + b);
   }
 
-  @Tool('subtract', 'Subtracts the second number from the first')
+  @Tool('Subtracts the second number from the first')
   subtract(
     @Param('Number to subtract from') a: number,
     @Param('Number to subtract') b: number
@@ -25,7 +25,7 @@ export class CalculatorServer extends MCPServer {
     return ok(a - b);
   }
 
-  @Tool('multiply', 'Multiplies two numbers')
+  @Tool('Multiplies two numbers')
   multiply(@Param('First number') a: number, @Param('Second number') b: number): CalculatorResult {
     return ok(a * b);
   }
@@ -42,13 +42,13 @@ export class CalculatorServer extends MCPServer {
     return ok(result);
   }
 
-  @Tool('power', 'Raises a number to a power')
+  @Tool('Raises a number to a power')
   power(@Param('Base number') base: number, @Param('Exponent') exponent: number): CalculatorResult {
     const result = Math.pow(base, exponent);
     return ok(result);
   }
 
-  @Tool('sqrt', 'Calculates the square root of a number')
+  @Tool('square-root', 'Calculates the square root of a number')
   sqrt(@Param('Number to find square root of') n: number): CalculatorResult {
     if (n < 0) {
       return err('Cannot calculate square root of negative number');

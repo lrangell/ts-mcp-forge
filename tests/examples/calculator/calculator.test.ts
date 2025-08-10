@@ -67,7 +67,7 @@ describe('CalculatorServer', () => {
     });
 
     it('should calculate square root', async () => {
-      const result = await calculator.callTool('sqrt', { n: 16 });
+      const result = await calculator.callTool('square-root', { n: 16 });
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value.content[0].text).toBe('4');
@@ -75,7 +75,7 @@ describe('CalculatorServer', () => {
     });
 
     it('should handle negative square root', async () => {
-      const result = await calculator.callTool('sqrt', { n: -4 });
+      const result = await calculator.callTool('square-root', { n: -4 });
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.message).toContain('Cannot calculate square root of negative number');
@@ -100,7 +100,7 @@ describe('CalculatorServer', () => {
       expect(toolNames).toContain('multiply');
       expect(toolNames).toContain('divide');
       expect(toolNames).toContain('power');
-      expect(toolNames).toContain('sqrt');
+      expect(toolNames).toContain('square-root');
     });
 
     it('should have no resources', () => {
