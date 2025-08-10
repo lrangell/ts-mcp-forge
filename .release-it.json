@@ -1,0 +1,46 @@
+{
+  "git": {
+    "requireBranch": "main",
+    "commitMessage": "chore: release v${version}",
+    "tagName": "v${version}",
+    "requireCommits": true,
+    "requireCleanWorkingDir": true
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}",
+    "draft": false,
+    "autoGenerate": true
+  },
+  "npm": {
+    "publish": true,
+    "publishPath": ".",
+    "tag": "latest",
+    "otp": null
+  },
+  "hooks": {
+    "before:init": ["pnpm run check"],
+    "after:bump": ["pnpm install --no-frozen-lockfile"],
+    "after:git:release": "echo Successfully released ${name} v${version} to ${repo.repository}.",
+    "after:release": "echo Successfully published to npm registry."
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          { "type": "feat", "section": "Features" },
+          { "type": "fix", "section": "Bug Fixes" },
+          { "type": "chore", "section": "Maintenance" },
+          { "type": "docs", "section": "Documentation" },
+          { "type": "style", "section": "Style" },
+          { "type": "refactor", "section": "Refactoring" },
+          { "type": "perf", "section": "Performance" },
+          { "type": "test", "section": "Tests" }
+        ]
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog"
+    }
+  }
+}

@@ -1,0 +1,65 @@
+# Source files
+src/
+examples/
+tests/
+docs/
+
+# Configuration files
+.gitignore
+.prettierrc
+.prettierignore
+oxlintrc.json
+vite.config.ts
+vitest.config.ts
+tsconfig.json
+tsconfig.build.json
+.release-it.json
+
+# Development dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Test coverage
+coverage/
+.nyc_output
+
+# Build artifacts
+dist-test/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# Git
+.git/
+.github/
+
+# Documentation source (keep built docs)
+*.md
+!README.md
+!CHANGELOG.md
