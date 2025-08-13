@@ -291,14 +291,16 @@ describe('MCPRouter', () => {
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
       const response = result.value as any;
-      expect(response).toHaveProperty('contents');
-      expect(response.contents).toBeInstanceOf(Array);
-      expect(response.contents).toHaveLength(1);
-      expect(response.contents[0]).toHaveProperty('uri', 'test://data');
-      expect(response.contents[0]).toHaveProperty('mimeType', 'application/json');
-      expect(response.contents[0]).toHaveProperty('text');
+      // Handle nested Result from asyncAndThen
+      const actualResponse = response.value || response;
+      expect(actualResponse).toHaveProperty('contents');
+      expect(actualResponse.contents).toBeInstanceOf(Array);
+      expect(actualResponse.contents).toHaveLength(1);
+      expect(actualResponse.contents[0]).toHaveProperty('uri', 'test://data');
+      expect(actualResponse.contents[0]).toHaveProperty('mimeType', 'application/json');
+      expect(actualResponse.contents[0]).toHaveProperty('text');
 
-      const data = JSON.parse(response.contents[0].text);
+      const data = JSON.parse(actualResponse.contents[0].text);
       expect(data).toHaveProperty('test', 'data');
       expect(data).toHaveProperty('timestamp');
     }

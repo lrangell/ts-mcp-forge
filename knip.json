@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": ["src/index.ts", "examples/**/index.ts"],
+  "project": ["src/**/*.ts", "examples/**/*.ts", "tests/**/*.test.ts"],
+  "ignore": ["dist/**", "node_modules/**"],
+  "ignoreDependencies": [],
+  "vitest": {
+    "config": ["vitest.config.ts"]
+  }
+}
