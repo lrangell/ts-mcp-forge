@@ -23,6 +23,35 @@ pnpm add ts-mcp-forge
 yarn add ts-mcp-forge
 ```
 
+## TypeScript Configuration
+
+ts-mcp-forge requires decorator metadata to generate proper JSON schemas. Add these settings to your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
+```
+
+**Important:** Many bundlers like esbuild don't emit decorator metadata by default, which will result in missing type information in generated schemas. If you're using Vite or other esbuild-based tools, configure them to use SWC or another transformer that preserves decorator metadata:
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import swc from 'unplugin-swc';
+
+export default defineConfig({
+  plugins: [
+    swc.vite({
+      module: { type: 'es6' }
+    })
+  ]
+});
+```
+
 ## Quick Start
 
 ```typescript
