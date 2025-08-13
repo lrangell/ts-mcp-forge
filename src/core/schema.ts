@@ -3,7 +3,7 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { sortBy } from 'remeda';
 import { ParamMetadata } from '../decorators/metadata.js';
 
-const typeToZod = (type: any): z.ZodTypeAny => {
+const typeToZod = (type: unknown): z.ZodTypeAny => {
   if (!type) return z.any();
 
   if (type instanceof z.ZodType) {
@@ -39,14 +39,14 @@ export const generateParamsSchema = (params: ParamMetadata[] = []) => {
 
   const sortedParams = sortBy(params, (p) => p.index);
 
-  const properties: Record<string, any> = {};
+  const properties: Record<string, unknown> = {};
   const required: string[] = [];
 
   sortedParams.forEach((param) => {
     const zodSchema = typeToZod(param.type);
     const jsonSchema = zodToJsonSchema(zodSchema, { $refStrategy: 'none' });
 
-    const { $schema: _$schema, ...schemaWithoutMeta } = jsonSchema as any;
+    const { $schema: _$schema, ...schemaWithoutMeta } = jsonSchema as Record<string, unknown>;
 
     properties[param.name] = {
       ...schemaWithoutMeta,
@@ -95,8 +95,8 @@ export const generatePromptSchema = (
 
 export const validateParams = (
   params: ParamMetadata[],
-  input: any
-): z.SafeParseReturnType<any, any> => {
+  input: unknown
+): z.SafeParseReturnType<unknown, unknown> => {
   if (!input || typeof input !== 'object') {
     return { success: false, error: new z.ZodError([]) };
   }
