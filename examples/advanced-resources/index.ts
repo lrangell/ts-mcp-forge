@@ -9,6 +9,9 @@ import {
   Resource,
   ResourceTemplate,
   Param,
+  DynamicResource,
+  DynamicPrompt,
+  PromptTemplate,
   StdioTransport,
 } from '../../src/index.js';
 
@@ -17,12 +20,15 @@ import {
  * Demonstrates:
  * - Subscribable resources
  * - Resource templates with URI parameters
- * - Dynamic resource registration
+ * - Dynamic resource registration using @DynamicResource decorator
+ * - Dynamic prompt registration using @DynamicPrompt decorator
+ * - Prompt templates with parameters
  * - List changed notifications
  */
 class AdvancedResourcesServer extends MCPServer {
   private fileWatchers: Map<string, NodeJS.Timeout> = new Map();
   private projectRoot: string;
+  private logFiles: string[] = [];
 
   constructor() {
     super('Advanced Resources Server', '1.0.0');
@@ -88,13 +94,49 @@ class AdvancedResourcesServer extends MCPServer {
     }
   }
 
-  // Tool to demonstrate dynamic resource registration
+  // Initialize dynamic resources when server starts
+  @DynamicResource('Initialize log file resources')
+  async initializeDynamicResources(): Promise<void> {
+    // Scan for log files in the project
+    try {
+      // Use current directory if projectRoot is not set
+      const searchPath = this.projectRoot || process.cwd();
+      const files = await fs.readdir(searchPath);
+      this.logFiles = files.filter((f) => f.endsWith('.log'));
+
+      // Register each log file as a dynamic resource
+      for (const logFile of this.logFiles) {
+        const uri = `log://${logFile}`;
+
+        const handler = async (): Promise<Result<string, string>> => {
+          try {
+            const fullPath = path.join(this.projectRoot, logFile);
+            const content = await fs.readFile(fullPath, 'utf-8');
+            return ok(content);
+          } catch (error: any) {
+            return err(`Failed to read log: ${error.message}`);
+          }
+        };
+
+        this.registerResource(uri, handler, `Log file: ${logFile}`, true);
+      }
+    } catch (error) {
+      console.error('Failed to initialize log resources:', error);
+    }
+  }
+
+  // Tool to manually register additional log resources
   @Tool('register-log-resource', 'Register a log file as a dynamic resource')
   async registerLogResource(
     @Param('Path to log file') logPath: string,
     @Param('Enable subscriptions') subscribable: boolean = false
   ): Promise<Result<string, string>> {
     const uri = `log://${logPath}`;
+
+    // Check if already registered
+    if (this.logFiles.includes(logPath)) {
+      return err(`Resource already registered: ${uri}`);
+    }
 
     // Create handler for the dynamic resource
     const handler = async (): Promise<Result<string, string>> => {
@@ -118,6 +160,8 @@ class AdvancedResourcesServer extends MCPServer {
     if (result.isErr()) {
       return err(result.error.message);
     }
+
+    this.logFiles.push(logPath);
 
     // If subscribable, simulate updates
     if (subscribable) {
@@ -173,6 +217,129 @@ class AdvancedResourcesServer extends MCPServer {
       this.fileWatchers.delete(uri);
     }
   }
+
+  // Initialize dynamic prompts when server starts
+  @DynamicPrompt('Initialize analysis prompts')
+  initializeDynamicPrompts(): void {
+    // Register a prompt for log analysis
+    this.registerPrompt(
+      'analyze-logs',
+      async (logType: string, timeRange: string) =>
+        ok({
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are a log analysis expert. Focus on identifying errors, warnings, and patterns.',
+            },
+            {
+              role: 'user',
+              content: `Analyze ${logType} logs from the ${timeRange} time range. Look for:
+1. Error patterns and their frequency
+2. Warning messages that might indicate issues
+3. Performance bottlenecks
+4. Security concerns
+5. Unusual patterns or anomalies`,
+            },
+          ],
+        }),
+      'Prompt for analyzing log files',
+      [
+        {
+          index: 0,
+          name: 'logType',
+          description: 'Type of logs (e.g., application, system, security)',
+        },
+        {
+          index: 1,
+          name: 'timeRange',
+          description: 'Time range to analyze (e.g., last hour, today, this week)',
+        },
+      ]
+    );
+
+    // Register a prompt for config validation
+    this.registerPrompt(
+      'validate-config',
+      async (configName: string) =>
+        ok({
+          messages: [
+            {
+              role: 'user',
+              content: `Validate the configuration file: ${configName}. Check for:
+- Missing required fields
+- Invalid values or types
+- Security issues (exposed secrets, weak settings)
+- Performance implications
+- Best practices compliance`,
+            },
+          ],
+        }),
+      'Prompt for validating configuration files',
+      [{ index: 0, name: 'configName', description: 'Name of the configuration to validate' }]
+    );
+  }
+
+  // Prompt templates for different file types
+  @PromptTemplate('debug/{language}/{issue}', {
+    description: 'Generate debugging prompts for specific languages and issues',
+  })
+  async getDebugPrompt(params: {
+    language: string;
+    issue: string;
+  }): Promise<Result<object, string>> {
+    const debugStrategies: Record<string, string> = {
+      javascript: 'Use console.log, debugger statements, and Chrome DevTools',
+      python: 'Use print statements, pdb debugger, and logging module',
+      rust: 'Use println!, dbg! macro, and rust-gdb',
+      go: 'Use fmt.Println, Delve debugger, and pprof',
+    };
+
+    const strategy =
+      debugStrategies[params.language.toLowerCase()] || 'Use appropriate debugging tools';
+
+    return ok({
+      messages: [
+        {
+          role: 'system',
+          content: `You are a ${params.language} debugging expert.`,
+        },
+        {
+          role: 'user',
+          content: `Help me debug this ${params.issue} issue in ${params.language}. 
+Debugging strategy: ${strategy}
+Please provide:
+1. Common causes of this issue
+2. Step-by-step debugging approach
+3. Code examples to identify the problem
+4. Potential fixes`,
+        },
+      ],
+    });
+  }
+
+  @PromptTemplate('optimize/{resource}/{metric}', {
+    description: 'Generate optimization prompts for different resources and metrics',
+  })
+  async getOptimizationPrompt(params: {
+    resource: string;
+    metric: string;
+  }): Promise<Result<object, string>> {
+    return ok({
+      messages: [
+        {
+          role: 'user',
+          content: `Provide optimization strategies for improving ${params.metric} of ${params.resource}.
+Focus on:
+1. Current bottlenecks and their impact
+2. Quick wins (easy optimizations with high impact)
+3. Long-term improvements
+4. Trade-offs to consider
+5. Monitoring and measurement approaches`,
+        },
+      ],
+    });
+  }
 }
 
 // Start the server
@@ -184,7 +351,9 @@ async function main() {
   console.error('Features:');
   console.error('- Subscribable resources (memory://system/stats)');
   console.error('- Resource templates (file:///{path}, config:///{name}.json)');
-  console.error('- Dynamic resource registration via tools');
+  console.error('- Dynamic resource registration via @DynamicResource decorator');
+  console.error('- Dynamic prompt registration via @DynamicPrompt decorator');
+  console.error('- Prompt templates (debug/{language}/{issue}, optimize/{resource}/{metric})');
   console.error('- List changed notifications');
 
   await transport.start(server);

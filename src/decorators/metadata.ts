@@ -5,6 +5,9 @@ const RESOURCE_METADATA = Symbol('resource');
 const RESOURCE_TEMPLATE_METADATA = Symbol('resourceTemplate');
 const PROMPT_METADATA = Symbol('prompt');
 const PARAM_METADATA = Symbol('param');
+const DYNAMIC_RESOURCE_METADATA = Symbol('dynamicResource');
+const DYNAMIC_PROMPT_METADATA = Symbol('dynamicPrompt');
+const PROMPT_TEMPLATE_METADATA = Symbol('promptTemplate');
 
 export interface ParamMetadata {
   index: number;
@@ -42,6 +45,22 @@ export interface PromptMetadata {
   description: string;
   method: string;
   params?: ParamMetadata[];
+}
+
+export interface DynamicResourceMetadata {
+  method: string;
+  description?: string;
+}
+
+export interface DynamicPromptMetadata {
+  method: string;
+  description?: string;
+}
+
+export interface PromptTemplateMetadata {
+  nameTemplate: string;
+  description?: string;
+  method: string;
 }
 
 export const setToolMetadata = (target: any, propertyKey: string, metadata: ToolMetadata): void => {
@@ -109,6 +128,51 @@ export const getParamMetadata = (target: any, propertyKey: string): ParamMetadat
   return Reflect.getMetadata(PARAM_METADATA, target, propertyKey);
 };
 
+export const setDynamicResourceMetadata = (
+  target: any,
+  propertyKey: string,
+  metadata: DynamicResourceMetadata
+): void => {
+  Reflect.defineMetadata(DYNAMIC_RESOURCE_METADATA, metadata, target, propertyKey);
+};
+
+export const getDynamicResourceMetadata = (
+  target: any,
+  propertyKey: string
+): DynamicResourceMetadata | undefined => {
+  return Reflect.getMetadata(DYNAMIC_RESOURCE_METADATA, target, propertyKey);
+};
+
+export const setDynamicPromptMetadata = (
+  target: any,
+  propertyKey: string,
+  metadata: DynamicPromptMetadata
+): void => {
+  Reflect.defineMetadata(DYNAMIC_PROMPT_METADATA, metadata, target, propertyKey);
+};
+
+export const getDynamicPromptMetadata = (
+  target: any,
+  propertyKey: string
+): DynamicPromptMetadata | undefined => {
+  return Reflect.getMetadata(DYNAMIC_PROMPT_METADATA, target, propertyKey);
+};
+
+export const setPromptTemplateMetadata = (
+  target: any,
+  propertyKey: string,
+  metadata: PromptTemplateMetadata
+): void => {
+  Reflect.defineMetadata(PROMPT_TEMPLATE_METADATA, metadata, target, propertyKey);
+};
+
+export const getPromptTemplateMetadata = (
+  target: any,
+  propertyKey: string
+): PromptTemplateMetadata | undefined => {
+  return Reflect.getMetadata(PROMPT_TEMPLATE_METADATA, target, propertyKey);
+};
+
 export const getAllToolsMetadata = (target: any): Map<string, ToolMetadata> => {
   const metadata = new Map<string, ToolMetadata>();
   const prototype = target.prototype || target;
@@ -169,6 +233,56 @@ export const getAllResourceTemplatesMetadata = (
     const resourceTemplateMeta = getResourceTemplateMetadata(prototype, propertyKey);
     if (resourceTemplateMeta) {
       metadata.set(propertyKey, resourceTemplateMeta);
+    }
+  });
+
+  return metadata;
+};
+
+export const getAllDynamicResourcesMetadata = (
+  target: any
+): Map<string, DynamicResourceMetadata> => {
+  const metadata = new Map<string, DynamicResourceMetadata>();
+  const prototype = target.prototype || target;
+
+  Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
+    if (propertyKey === 'constructor') return;
+
+    const dynamicResourceMeta = getDynamicResourceMetadata(prototype, propertyKey);
+    if (dynamicResourceMeta) {
+      metadata.set(propertyKey, dynamicResourceMeta);
+    }
+  });
+
+  return metadata;
+};
+
+export const getAllDynamicPromptsMetadata = (target: any): Map<string, DynamicPromptMetadata> => {
+  const metadata = new Map<string, DynamicPromptMetadata>();
+  const prototype = target.prototype || target;
+
+  Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
+    if (propertyKey === 'constructor') return;
+
+    const dynamicPromptMeta = getDynamicPromptMetadata(prototype, propertyKey);
+    if (dynamicPromptMeta) {
+      metadata.set(propertyKey, dynamicPromptMeta);
+    }
+  });
+
+  return metadata;
+};
+
+export const getAllPromptTemplatesMetadata = (target: any): Map<string, PromptTemplateMetadata> => {
+  const metadata = new Map<string, PromptTemplateMetadata>();
+  const prototype = target.prototype || target;
+
+  Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
+    if (propertyKey === 'constructor') return;
+
+    const promptTemplateMeta = getPromptTemplateMetadata(prototype, propertyKey);
+    if (promptTemplateMeta) {
+      metadata.set(propertyKey, promptTemplateMeta);
     }
   });
 

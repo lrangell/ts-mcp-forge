@@ -1,7 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../src/core/server.js';
-import { Tool, Resource, Prompt, Param } from '../../src/decorators/index.js';
+import {
+  Tool,
+  Resource,
+  Prompt,
+  Param,
+  DynamicResource,
+  DynamicPrompt,
+  PromptTemplate,
+} from '../../src/decorators/index.js';
 import { createMCPRouter } from '../../src/core/router.js';
 import { ErrorCodes } from '../../src/core/jsonrpc.js';
 
@@ -346,5 +354,204 @@ describe('MCPRouter', () => {
       expect(result.error.code).toBe(ErrorCodes.INVALID_PARAMS);
       expect(result.error.message).toContain('name is required');
     }
+  });
+});
+
+describe('Dynamic Prompts', () => {
+  class DynamicPromptServer extends MCPServer {
+    constructor() {
+      super('Dynamic Prompt Server', '1.0.0');
+    }
+
+    @DynamicPrompt('Initialize custom prompts')
+    initializePrompts(): void {
+      // Register a dynamic prompt
+      this.registerPrompt(
+        'dynamic-test',
+        async (subject: string) =>
+          ok({
+            messages: [{ role: 'user', content: `Analyze: ${subject}` }],
+          }),
+        'A dynamically registered prompt',
+        [{ index: 0, name: 'subject', description: 'Subject to analyze' }]
+      );
+
+      // Register another dynamic prompt
+      this.registerPrompt(
+        'custom-format',
+        async (format: string, text: string) =>
+          ok({
+            messages: [{ role: 'user', content: `Format as ${format}: ${text}` }],
+          }),
+        'Custom formatting prompt',
+        [
+          { index: 0, name: 'format', description: 'Format type' },
+          { index: 1, name: 'text', description: 'Text to format' },
+        ]
+      );
+    }
+
+    @PromptTemplate('code-review/{language}', { description: 'Code review by language' })
+    async getCodeReviewPrompt(params: { language: string }): Promise<Result<object, string>> {
+      return ok({
+        messages: [{ role: 'user', content: `Review this ${params.language} code` }],
+      });
+    }
+  }
+
+  let server: DynamicPromptServer;
+
+  beforeEach(() => {
+    server = new DynamicPromptServer();
+  });
+
+  describe('registerPrompt', () => {
+    it('should register and list dynamic prompts', () => {
+      const prompts = server.listPrompts();
+
+      // Should include dynamically registered prompts
+      const promptNames = prompts.map((p) => p.name);
+      expect(promptNames).toContain('dynamic-test');
+      expect(promptNames).toContain('custom-format');
+    });
+
+    it('should call dynamic prompt handlers', async () => {
+      const result = await server.getPrompt('dynamic-test', { subject: 'TypeScript' });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const response = result.value as any;
+        expect(response.messages[0].content).toBe('Analyze: TypeScript');
+      }
+    });
+
+    it('should handle multiple arguments in dynamic prompts', async () => {
+      const result = await server.getPrompt('custom-format', {
+        format: 'JSON',
+        text: 'hello world',
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const response = result.value as any;
+        expect(response.messages[0].content).toBe('Format as JSON: hello world');
+      }
+    });
+  });
+
+  describe('unregisterPrompt', () => {
+    it('should unregister dynamic prompts', () => {
+      // Register a temporary prompt
+      server.registerPrompt('temp-prompt', async () => ok({ messages: [] }), 'Temporary prompt');
+
+      let prompts = server.listPrompts();
+      expect(prompts.map((p) => p.name)).toContain('temp-prompt');
+
+      // Unregister it
+      server.unregisterPrompt('temp-prompt');
+
+      prompts = server.listPrompts();
+      expect(prompts.map((p) => p.name)).not.toContain('temp-prompt');
+    });
+  });
+
+  describe('PromptTemplate', () => {
+    it('should handle prompt templates with parameters', async () => {
+      const result = await server.getPrompt('code-review/python', {});
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const response = result.value as any;
+        expect(response.messages[0].content).toBe('Review this python code');
+      }
+    });
+
+    it('should handle different template parameters', async () => {
+      const result = await server.getPrompt('code-review/javascript', {});
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const response = result.value as any;
+        expect(response.messages[0].content).toBe('Review this javascript code');
+      }
+    });
+
+    it('should return error for non-matching template', async () => {
+      const result = await server.getPrompt('non-existent-template', {});
+
+      expect(result.isErr()).toBe(true);
+      if (result.isErr()) {
+        expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+      }
+    });
+  });
+});
+
+describe('Dynamic Resources', () => {
+  class DynamicResourceServer extends MCPServer {
+    private dynamicData: Map<string, any> = new Map();
+
+    constructor() {
+      super('Dynamic Resource Server', '1.0.0');
+    }
+
+    @DynamicResource('Initialize dynamic resources')
+    initializeResources(): void {
+      // Register a dynamic resource
+      this.registerResource(
+        'dynamic://data/test',
+        async () => ok({ value: this.dynamicData.get('test') || 'default' }),
+        'Dynamic test data',
+        false
+      );
+
+      // Register a subscribable dynamic resource
+      this.registerResource(
+        'dynamic://data/live',
+        async () => ok({ timestamp: Date.now() }),
+        'Live data resource',
+        true
+      );
+    }
+
+    setDynamicData(key: string, value: any): void {
+      this.dynamicData.set(key, value);
+    }
+  }
+
+  let server: DynamicResourceServer;
+
+  beforeEach(() => {
+    server = new DynamicResourceServer();
+  });
+
+  describe('DynamicResource decorator', () => {
+    it('should initialize dynamic resources on construction', () => {
+      const resources = server.listResources();
+
+      const uris = resources.map((r) => r.uri);
+      expect(uris).toContain('dynamic://data/test');
+      expect(uris).toContain('dynamic://data/live');
+    });
+
+    it('should read dynamic resources', async () => {
+      server.setDynamicData('test', 'custom value');
+      const result = await server.readResource('dynamic://data/test');
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const contents = result.value.contents[0];
+        expect(contents.text).toContain('custom value');
+      }
+    });
+
+    it('should unregister dynamic resources', () => {
+      server.unregisterResource('dynamic://data/test');
+
+      const resources = server.listResources();
+      const uris = resources.map((r) => r.uri);
+      expect(uris).not.toContain('dynamic://data/test');
+      expect(uris).toContain('dynamic://data/live'); // Other resource still exists
+    });
   });
 });

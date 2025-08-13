@@ -1,7 +1,18 @@
 export { MCPServer } from './core/server.js';
-export { Tool, Resource, Prompt, Param } from './decorators/index.js';
+export {
+  Tool,
+  Resource,
+  Prompt,
+  Param,
+  DynamicResource,
+  DynamicPrompt,
+  PromptTemplate,
+} from './decorators/index.js';
 export { ResourceTemplate, type ResourceTemplateOptions } from './decorators/resource-template.js';
 export type { ResourceOptions } from './decorators/resource.js';
+export type { DynamicResourceOptions } from './decorators/dynamic-resource.js';
+export type { DynamicPromptOptions } from './decorators/dynamic-prompt.js';
+export type { PromptTemplateOptions } from './decorators/prompt-template.js';
 export type {
   ToolMetadata,
   ResourceMetadata,

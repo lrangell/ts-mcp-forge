@@ -6,10 +6,15 @@ import {
   getAllResourcesMetadata,
   getAllResourceTemplatesMetadata,
   getAllPromptsMetadata,
+  getAllDynamicResourcesMetadata,
+  getAllDynamicPromptsMetadata,
+  getAllPromptTemplatesMetadata,
   ToolMetadata,
   ResourceMetadata,
   ResourceTemplateMetadata,
   PromptMetadata,
+  PromptTemplateMetadata,
+  ParamMetadata,
 } from '../decorators/metadata.js';
 import { generateToolSchema, generatePromptSchema, validateParams } from './schema.js';
 import {
@@ -40,7 +45,9 @@ export abstract class MCPServer {
   private resources: Map<string, ResourceMetadata>;
   private resourceTemplates: Map<string, ResourceTemplateMetadata>;
   private prompts: Map<string, PromptMetadata>;
+  private promptTemplates: Map<string, PromptTemplateMetadata>;
   private dynamicResources: Map<string, ResourceMetadata>;
+  private dynamicPrompts: Map<string, PromptMetadata>;
   private subscriptionManager: SubscriptionManager;
   private notificationManager: NotificationManager;
 
@@ -52,9 +59,17 @@ export abstract class MCPServer {
     this.resources = getAllResourcesMetadata(this.constructor);
     this.resourceTemplates = getAllResourceTemplatesMetadata(this.constructor);
     this.prompts = getAllPromptsMetadata(this.constructor);
+    this.promptTemplates = getAllPromptTemplatesMetadata(this.constructor);
     this.dynamicResources = new Map();
+    this.dynamicPrompts = new Map();
     this.subscriptionManager = new SubscriptionManager();
     this.notificationManager = new NotificationManager(null, this.subscriptionManager);
+
+    // Initialize dynamic resources
+    this.initializeDynamicResources();
+
+    // Initialize dynamic prompts
+    this.initializeDynamicPrompts();
   }
 
   handleInitialize(): InitializeResponse {
@@ -64,6 +79,8 @@ export abstract class MCPServer {
       ...this.resources.values(),
       ...this.dynamicResources.values(),
     ].some((r: ResourceMetadata) => r.subscribable === true);
+    const hasPrompts =
+      this.prompts.size > 0 || this.dynamicPrompts.size > 0 || this.promptTemplates.size > 0;
 
     return {
       protocolVersion: '2025-06-18',
@@ -75,7 +92,7 @@ export abstract class MCPServer {
               listChanged: true,
             }
           : undefined,
-        prompts: this.prompts.size > 0 ? {} : undefined,
+        prompts: hasPrompts ? {} : undefined,
       },
       serverInfo: {
         name: this.serverName,
@@ -116,9 +133,15 @@ export abstract class MCPServer {
   }
 
   listPrompts(): Prompt[] {
-    return map(Array.from(this.prompts.values()), (meta) =>
+    const staticPrompts = map(Array.from(this.prompts.values()), (meta) =>
       generatePromptSchema(meta.name, meta.description, meta.params)
     );
+
+    const dynamicPromptsList = map(Array.from(this.dynamicPrompts.values()), (meta) =>
+      generatePromptSchema(meta.name, meta.description, meta.params)
+    );
+
+    return [...staticPrompts, ...dynamicPromptsList];
   }
 
   async callTool(name: string, args?: unknown): Promise<Result<ToolCallResponse, JsonRpcError>> {
@@ -237,7 +260,18 @@ export abstract class MCPServer {
   }
 
   async getPrompt(name: string, args?: unknown): Promise<Result<unknown, JsonRpcError>> {
-    const promptMeta = find(Array.from(this.prompts.values()), (p) => p.name === name);
+    let promptMeta = find(Array.from(this.prompts.values()), (p) => p.name === name);
+
+    if (!promptMeta) {
+      promptMeta = this.dynamicPrompts.get(name);
+    }
+
+    if (!promptMeta) {
+      const templateMatch = this.findPromptTemplateMatch(name);
+      if (templateMatch) {
+        return this.getPromptFromTemplate(name, templateMatch, args);
+      }
+    }
 
     if (!promptMeta) {
       return err(
@@ -353,6 +387,40 @@ export abstract class MCPServer {
         }
       },
       (error) => new Error(`Failed to unregister resource: ${error}`)
+    );
+  }
+
+  registerPrompt(
+    name: string,
+    handler: (...args: any[]) => Promise<Result<unknown, string>>,
+    description?: string,
+    params?: ParamMetadata[]
+  ): Result<void, Error> {
+    return wrapSync(
+      () => {
+        const methodName = `dynamic_prompt_${name.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        this.dynamicPrompts.set(name, {
+          name,
+          description: description || '',
+          method: methodName,
+          params,
+        });
+        (this as Record<string, unknown>)[methodName] = handler;
+      },
+      (error) => new Error(`Failed to register prompt: ${error}`)
+    );
+  }
+
+  unregisterPrompt(name: string): Result<void, Error> {
+    return wrapSync(
+      () => {
+        const meta = this.dynamicPrompts.get(name);
+        if (meta) {
+          delete (this as Record<string, unknown>)[meta.method];
+          this.dynamicPrompts.delete(name);
+        }
+      },
+      (error) => new Error(`Failed to unregister prompt: ${error}`)
     );
   }
 
@@ -489,7 +557,10 @@ export abstract class MCPServer {
     name: string,
     argument: { name: string; value: string }
   ): Promise<Result<CompletionResponse, JsonRpcError>> {
-    const prompt = find(Array.from(this.prompts.values()), (p) => p.name === name);
+    const prompt = find(
+      [...Array.from(this.prompts.values()), ...Array.from(this.dynamicPrompts.values())],
+      (p) => p.name === name
+    );
 
     if (!prompt) {
       return err(
@@ -535,5 +606,74 @@ export abstract class MCPServer {
     _currentValue: string
   ): Promise<Array<{ value: string; description?: string }>> {
     return [];
+  }
+
+  private initializeDynamicResources(): void {
+    const dynamicResourceMethods = getAllDynamicResourcesMetadata(this.constructor);
+
+    dynamicResourceMethods.forEach((meta) => {
+      const method = (this as any)[meta.method];
+      if (typeof method === 'function') {
+        // Call the method to initialize dynamic resources
+        method.call(this);
+      }
+    });
+  }
+
+  private initializeDynamicPrompts(): void {
+    const dynamicPromptMethods = getAllDynamicPromptsMetadata(this.constructor);
+
+    dynamicPromptMethods.forEach((meta) => {
+      const method = (this as any)[meta.method];
+      if (typeof method === 'function') {
+        // Call the method to initialize dynamic prompts
+        method.call(this);
+      }
+    });
+  }
+
+  private findPromptTemplateMatch(name: string): PromptTemplateMetadata | null {
+    for (const template of this.promptTemplates.values()) {
+      // Simple pattern matching - check if name matches template pattern
+      const pattern = template.nameTemplate.replace(/{[^}]+}/g, '([^/]+)');
+      const regex = new RegExp(`^${pattern}$`);
+      if (regex.test(name)) {
+        return template;
+      }
+    }
+    return null;
+  }
+
+  private async getPromptFromTemplate(
+    name: string,
+    template: PromptTemplateMetadata,
+    args?: unknown
+  ): Promise<Result<any, JsonRpcError>> {
+    const method = (this as any)[template.method];
+    if (typeof method !== 'function') {
+      return err(
+        new JsonRpcError(ErrorCodes.INTERNAL_ERROR, ErrorMessages.METHOD_NOT_FOUND(template.method))
+      );
+    }
+
+    // Extract parameters from the name based on the template
+    const pattern = template.nameTemplate.replace(/{([^}]+)}/g, '(?<$1>[^/]+)');
+    const regex = new RegExp(`^${pattern}$`);
+    const match = name.match(regex);
+
+    const params = match?.groups || {};
+    const combinedArgs = { ...params, ...(args as object) };
+
+    const result = await method.call(this, combinedArgs);
+
+    if (result && typeof result === 'object' && 'isOk' in result) {
+      return result.mapErr((error: any) => {
+        const errorMessage =
+          typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
+        return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
+      });
+    }
+
+    return ok(result);
   }
 }
