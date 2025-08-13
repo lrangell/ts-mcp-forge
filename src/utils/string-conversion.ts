@@ -11,7 +11,7 @@ export function toTextContent(value: unknown): string {
     return 'undefined';
   }
   const stringified = safeJsonStringify(value);
-  return stringified.isOk() ? stringified.value : String(value);
+  return stringified.unwrapOr(String(value));
 }
 
 export function normalizeRequestBody(body: string | object | unknown): string {
@@ -28,7 +28,7 @@ export function tryParseJson<T = unknown>(text: string): Result<T, Error> {
 
 export function tryParseJsonLegacy<T = unknown>(text: string): T | null {
   const result = tryParseJson<T>(text);
-  return result.isOk() ? result.value : null;
+  return result.unwrapOr(null);
 }
 
 export function safeJsonStringify(value: unknown): Result<string, Error> {
@@ -43,5 +43,5 @@ export function safeJsonStringify(value: unknown): Result<string, Error> {
 
 export function safeStringify(value: unknown, fallback = ''): string {
   const result = safeJsonStringify(value);
-  return result.isOk() ? result.value : fallback;
+  return result.unwrapOr(fallback);
 }

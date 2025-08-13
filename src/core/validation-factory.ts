@@ -89,12 +89,12 @@ export function chainValidators<T>(
   ...validators: Array<(params: unknown) => Result<T, JsonRpcError>>
 ): (params: unknown) => Result<T, JsonRpcError> {
   return (params: unknown): Result<T, JsonRpcError> => {
+    let result: Result<T, JsonRpcError> = ok(params as T);
+
     for (const validator of validators) {
-      const result = validator(params);
-      if (result.isErr()) {
-        return result;
-      }
+      result = result.andThen(() => validator(params));
     }
-    return ok(params as T);
+
+    return result;
   };
 }

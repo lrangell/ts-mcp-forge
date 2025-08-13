@@ -70,19 +70,22 @@ export const handleJsonRpcMessage = async (
 ): Promise<string> => {
   const parseResult = parseJsonRpcMessage(message);
 
-  if (parseResult.isErr()) {
-    const response = createErrorResponse(0, parseResult.error);
-    return JSON.stringify(response);
-  }
+  return parseResult.match(
+    async (request) => {
+      const result = await handler(request.method, request.params, request.id);
 
-  const request = parseResult.value;
-  const result = await handler(request.method, request.params, request.id);
+      const response = result.match(
+        (value) => createSuccessResponse(request.id, value),
+        (error) => createErrorResponse(request.id, error)
+      );
 
-  const response = result.isOk()
-    ? createSuccessResponse(request.id, result.value)
-    : createErrorResponse(request.id, result.error);
-
-  return JSON.stringify(response);
+      return JSON.stringify(response);
+    },
+    (error) => {
+      const response = createErrorResponse(0, error);
+      return JSON.stringify(response);
+    }
+  );
 };
 
 export const handleJsonRpcBatch = async (

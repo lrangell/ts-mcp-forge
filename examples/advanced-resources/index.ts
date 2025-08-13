@@ -150,25 +150,18 @@ class AdvancedResourcesServer extends MCPServer {
     };
 
     // Register the resource dynamically
-    const result = this.registerResource(
-      uri,
-      handler,
-      `Dynamic log file: ${logPath}`,
-      subscribable
-    );
+    return this.registerResource(uri, handler, `Dynamic log file: ${logPath}`, subscribable)
+      .map(() => {
+        this.logFiles.push(logPath);
 
-    if (result.isErr()) {
-      return err(result.error.message);
-    }
+        // If subscribable, simulate updates
+        if (subscribable) {
+          this.startWatchingFile(uri, logPath);
+        }
 
-    this.logFiles.push(logPath);
-
-    // If subscribable, simulate updates
-    if (subscribable) {
-      this.startWatchingFile(uri, logPath);
-    }
-
-    return ok(`Successfully registered resource: ${uri}`);
+        return `Successfully registered resource: ${uri}`;
+      })
+      .mapErr((error) => error.message);
   }
 
   // Tool to unregister dynamic resources
@@ -179,25 +172,17 @@ class AdvancedResourcesServer extends MCPServer {
     // Stop watching if applicable
     this.stopWatchingFile(uri);
 
-    const result = this.unregisterResource(uri);
-
-    if (result.isErr()) {
-      return err(result.error.message);
-    }
-
-    return ok(`Successfully unregistered resource: ${uri}`);
+    return this.unregisterResource(uri)
+      .map(() => `Successfully unregistered resource: ${uri}`)
+      .mapErr((error) => error.message);
   }
 
   // Tool to trigger resource update notification
   @Tool('notify-update', 'Trigger a resource update notification')
   async triggerUpdate(@Param('Resource URI') uri: string): Promise<Result<string, string>> {
-    const result = await this.notifyResourceUpdate(uri);
-
-    if (result.isErr()) {
-      return err(result.error.message);
-    }
-
-    return ok(`Notification sent for: ${uri}`);
+    return (await this.notifyResourceUpdate(uri))
+      .map(() => `Notification sent for: ${uri}`)
+      .mapErr((error) => error.message);
   }
 
   private startWatchingFile(uri: string, _filePath: string): void {
