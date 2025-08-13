@@ -5,7 +5,7 @@ import { createMCPRouter } from '../core/router.js';
 import { handleJsonRpcMessage } from '../core/jsonrpc.js';
 import { Notification } from '../core/protocol.js';
 import { BaseNotificationSender } from '../utils/base-notification-sender.js';
-import { normalizeRequestBody, tryParseJson } from '../utils/string-conversion.js';
+import { normalizeRequestBody, tryParseJsonLegacy } from '../utils/string-conversion.js';
 
 class HttpNotificationSender extends BaseNotificationSender {
   private notificationQueue: Notification[] = [];
@@ -63,7 +63,7 @@ export const setupStreamableHttp = (
     );
 
     reply.header('Content-Type', 'application/json');
-    return responses.map((r) => tryParseJson(r) ?? r);
+    return responses.map((r) => tryParseJsonLegacy(r) ?? r);
   });
 
   app.get(`${path}/notifications`, async (_request: FastifyRequest, reply: FastifyReply) => {

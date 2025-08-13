@@ -1,3 +1,5 @@
+import { Result } from 'neverthrow';
+
 export function toTextContent(value: unknown): string {
   if (typeof value === 'string') {
     return value;
@@ -8,29 +10,38 @@ export function toTextContent(value: unknown): string {
   if (value === undefined) {
     return 'undefined';
   }
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
+  const stringified = safeJsonStringify(value);
+  return stringified.isOk() ? stringified.value : String(value);
 }
 
 export function normalizeRequestBody(body: string | object | unknown): string {
   return toTextContent(body);
 }
 
-export function tryParseJson<T = unknown>(text: string): T | null {
-  try {
-    return JSON.parse(text) as T;
-  } catch {
-    return null;
-  }
+export function tryParseJson<T = unknown>(text: string): Result<T, Error> {
+  return Result.fromThrowable(
+    () => JSON.parse(text) as T,
+    (error) =>
+      new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  )();
+}
+
+export function tryParseJsonLegacy<T = unknown>(text: string): T | null {
+  const result = tryParseJson<T>(text);
+  return result.isOk() ? result.value : null;
+}
+
+export function safeJsonStringify(value: unknown): Result<string, Error> {
+  return Result.fromThrowable(
+    () => JSON.stringify(value),
+    (error) =>
+      new Error(
+        `Failed to stringify JSON: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
+  )();
 }
 
 export function safeStringify(value: unknown, fallback = ''): string {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return fallback;
-  }
+  const result = safeJsonStringify(value);
+  return result.isOk() ? result.value : fallback;
 }
