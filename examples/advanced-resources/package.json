@@ -1,0 +1,17 @@
+{
+  "name": "advanced-resources-example",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "inspect": "npx @modelcontextprotocol/inspector tsx index.ts"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.2.2",
+    "neverthrow": "^8.1.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@modelcontextprotocol/inspector": "^0.2.0"
+  }
+}
