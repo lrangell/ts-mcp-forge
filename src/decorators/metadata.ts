@@ -2,6 +2,7 @@ import 'reflect-metadata';
 
 const TOOL_METADATA = Symbol('tool');
 const RESOURCE_METADATA = Symbol('resource');
+const RESOURCE_TEMPLATE_METADATA = Symbol('resourceTemplate');
 const PROMPT_METADATA = Symbol('prompt');
 const PARAM_METADATA = Symbol('param');
 
@@ -24,6 +25,15 @@ export interface ToolMetadata {
 export interface ResourceMetadata {
   uri: string;
   description?: string;
+  method: string;
+  subscribable?: boolean;
+}
+
+export interface ResourceTemplateMetadata {
+  uriTemplate: string;
+  name?: string;
+  description?: string;
+  mimeType?: string;
   method: string;
 }
 
@@ -55,6 +65,21 @@ export const getResourceMetadata = (
   propertyKey: string
 ): ResourceMetadata | undefined => {
   return Reflect.getMetadata(RESOURCE_METADATA, target, propertyKey);
+};
+
+export const setResourceTemplateMetadata = (
+  target: any,
+  propertyKey: string,
+  metadata: ResourceTemplateMetadata
+): void => {
+  Reflect.defineMetadata(RESOURCE_TEMPLATE_METADATA, metadata, target, propertyKey);
+};
+
+export const getResourceTemplateMetadata = (
+  target: any,
+  propertyKey: string
+): ResourceTemplateMetadata | undefined => {
+  return Reflect.getMetadata(RESOURCE_TEMPLATE_METADATA, target, propertyKey);
 };
 
 export const setPromptMetadata = (
@@ -126,6 +151,24 @@ export const getAllPromptsMetadata = (target: any): Map<string, PromptMetadata> 
     const promptMeta = getPromptMetadata(prototype, propertyKey);
     if (promptMeta) {
       metadata.set(propertyKey, promptMeta);
+    }
+  });
+
+  return metadata;
+};
+
+export const getAllResourceTemplatesMetadata = (
+  target: any
+): Map<string, ResourceTemplateMetadata> => {
+  const metadata = new Map<string, ResourceTemplateMetadata>();
+  const prototype = target.prototype || target;
+
+  Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
+    if (propertyKey === 'constructor') return;
+
+    const resourceTemplateMeta = getResourceTemplateMetadata(prototype, propertyKey);
+    if (resourceTemplateMeta) {
+      metadata.set(propertyKey, resourceTemplateMeta);
     }
   });
 
