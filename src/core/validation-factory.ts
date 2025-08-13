@@ -8,7 +8,7 @@ interface FieldValidation {
   field: string;
   errorMessage: string;
   optional?: boolean;
-  validator?: (value: any) => boolean;
+  validator?: (value: unknown) => boolean;
 }
 
 /**
@@ -24,18 +24,15 @@ export function createValidator<T>(
       return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Parameters must be an object'));
     }
 
-    const typedParams = params as Record<string, any>;
+    const typedParams = params as Record<string, unknown>;
 
-    // Check each validation rule
     for (const validation of validations) {
       const value = typedParams[validation.field];
 
-      // Check required fields
       if (!validation.optional && (value === undefined || value === null || value === '')) {
         return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, validation.errorMessage));
       }
 
-      // Run custom validator if provided
       if (value !== undefined && value !== null && validation.validator) {
         if (!validation.validator(value)) {
           return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, validation.errorMessage));

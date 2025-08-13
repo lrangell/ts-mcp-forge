@@ -526,7 +526,7 @@ describe('Dynamic Resources', () => {
   });
 
   describe('DynamicResource decorator', () => {
-    it('should initialize dynamic resources on construction', () => {
+    it('should initialize dynamic resources on first access', () => {
       const resources = server.listResources();
 
       const uris = resources.map((r) => r.uri);
@@ -546,6 +546,10 @@ describe('Dynamic Resources', () => {
     });
 
     it('should unregister dynamic resources', () => {
+      const resourcesBefore = server.listResources();
+      const urisBefore = resourcesBefore.map((r) => r.uri);
+      expect(urisBefore).toContain('dynamic://data/test');
+
       server.unregisterResource('dynamic://data/test');
 
       const resources = server.listResources();

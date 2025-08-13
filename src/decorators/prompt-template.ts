@@ -9,7 +9,7 @@ export function PromptTemplate(
   nameTemplate: string,
   options?: PromptTemplateOptions
 ): MethodDecorator {
-  return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function (target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
     if (typeof propertyKey === 'symbol') {
       throw new Error('PromptTemplate decorator cannot be used on symbol properties');
     }

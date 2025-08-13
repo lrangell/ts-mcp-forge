@@ -53,7 +53,6 @@ interface CompletionCompleteParams {
   };
 }
 
-// Create validators using the factory pattern for cleaner code
 const validateToolCall = createRequiredFieldValidator<ToolCallParams>(
   'name',
   'Tool name is required'

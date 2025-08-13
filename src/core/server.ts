@@ -30,7 +30,7 @@ import { JsonRpcError, ErrorCodes } from './jsonrpc.js';
 import { SubscriptionManager } from './subscription-manager.js';
 import { NotificationManager, NotificationSender } from './notifications.js';
 import { wrapSync } from '../utils/error-handling.js';
-import { toTextContent } from '../utils/string-conversion.js';
+import { MethodInvoker } from '../utils/method-invoker.js';
 
 const ErrorMessages = {
   TOOL_NOT_FOUND: (name: string) => `Tool '${name}' not found`,
@@ -50,6 +50,8 @@ export abstract class MCPServer {
   private dynamicPrompts: Map<string, PromptMetadata>;
   private subscriptionManager: SubscriptionManager;
   private notificationManager: NotificationManager;
+  private dynamicResourcesInitialized: boolean = false;
+  private dynamicPromptsInitialized: boolean = false;
 
   constructor(
     private serverName: string = 'MCP Server',
@@ -64,15 +66,12 @@ export abstract class MCPServer {
     this.dynamicPrompts = new Map();
     this.subscriptionManager = new SubscriptionManager();
     this.notificationManager = new NotificationManager(null, this.subscriptionManager);
-
-    // Initialize dynamic resources
-    this.initializeDynamicResources();
-
-    // Initialize dynamic prompts
-    this.initializeDynamicPrompts();
   }
 
   handleInitialize(): InitializeResponse {
+    this.ensureDynamicResourcesInitialized();
+    this.ensureDynamicPromptsInitialized();
+
     const hasResources =
       this.resources.size > 0 || this.dynamicResources.size > 0 || this.resourceTemplates.size > 0;
     const hasSubscribableResources = [
@@ -108,6 +107,8 @@ export abstract class MCPServer {
   }
 
   listResources(): Resource[] {
+    this.ensureDynamicResourcesInitialized();
+
     const staticResources = map(Array.from(this.resources.values()), (meta) => ({
       uri: meta.uri,
       name: meta.method,
@@ -133,6 +134,8 @@ export abstract class MCPServer {
   }
 
   listPrompts(): Prompt[] {
+    this.ensureDynamicPromptsInitialized();
+
     const staticPrompts = map(Array.from(this.prompts.values()), (meta) =>
       generatePromptSchema(meta.name, meta.description, meta.params)
     );
@@ -151,13 +154,6 @@ export abstract class MCPServer {
       return err(new JsonRpcError(ErrorCodes.METHOD_NOT_FOUND, ErrorMessages.TOOL_NOT_FOUND(name)));
     }
 
-    const method = (this as any)[toolMeta.method];
-    if (typeof method !== 'function') {
-      return err(
-        new JsonRpcError(ErrorCodes.INTERNAL_ERROR, ErrorMessages.METHOD_NOT_FOUND(toolMeta.method))
-      );
-    }
-
     if (toolMeta.params && toolMeta.params.length > 0) {
       const validation = validateParams(toolMeta.params, args);
       if (!validation.success) {
@@ -168,37 +164,16 @@ export abstract class MCPServer {
     }
 
     const argsObject = args as Record<string, unknown> | undefined;
-    const argsArray = toolMeta.params ? toolMeta.params.map((p) => argsObject?.[p.name]) : [];
-    const result = await method.apply(this, argsArray);
+    const argsArray = MethodInvoker.prepareArguments(toolMeta.params, argsObject);
 
-    if (result && typeof result === 'object' && 'isOk' in result) {
-      return result
-        .map((value: any) => ({
-          content: [
-            {
-              type: 'text',
-              text: toTextContent(value),
-            },
-          ],
-        }))
-        .mapErr((error: any) => {
-          const errorMessage =
-            typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
-          return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
-        });
-    }
-
-    return ok({
-      content: [
-        {
-          type: 'text',
-          text: toTextContent(result),
-        },
-      ],
-    });
+    return MethodInvoker.invokeMethod(this, toolMeta.method, argsArray).then((result) =>
+      result.map((value) => MethodInvoker.createToolResponse(value)).mapErr((error) => error)
+    );
   }
 
-  async readResource(uri: string): Promise<Result<any, JsonRpcError>> {
+  async readResource(uri: string): Promise<Result<unknown, JsonRpcError>> {
+    this.ensureDynamicResourcesInitialized();
+
     let resourceMeta = find(Array.from(this.resources.values()), (r) => r.uri === uri);
 
     if (!resourceMeta) {
@@ -218,48 +193,14 @@ export abstract class MCPServer {
       );
     }
 
-    const method = (this as any)[resourceMeta.method];
-    if (typeof method !== 'function') {
-      return err(
-        new JsonRpcError(
-          ErrorCodes.INTERNAL_ERROR,
-          ErrorMessages.METHOD_NOT_FOUND(resourceMeta.method)
-        )
-      );
-    }
-
-    const result = await method.call(this);
-
-    if (result && typeof result === 'object' && 'isOk' in result) {
-      return result
-        .map((resourceData: any) => ({
-          contents: [
-            {
-              uri: uri,
-              mimeType: 'application/json',
-              text: toTextContent(resourceData),
-            },
-          ],
-        }))
-        .mapErr((error: any) => {
-          const errorMessage =
-            typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
-          return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
-        });
-    }
-
-    return ok({
-      contents: [
-        {
-          uri: uri,
-          mimeType: 'application/json',
-          text: toTextContent(result),
-        },
-      ],
-    });
+    return MethodInvoker.invokeMethod(this, resourceMeta.method, []).then((result) =>
+      result.map((value) => MethodInvoker.createResourceResponse(uri, value))
+    );
   }
 
   async getPrompt(name: string, args?: unknown): Promise<Result<unknown, JsonRpcError>> {
+    this.ensureDynamicPromptsInitialized();
+
     let promptMeta = find(Array.from(this.prompts.values()), (p) => p.name === name);
 
     if (!promptMeta) {
@@ -279,16 +220,6 @@ export abstract class MCPServer {
       );
     }
 
-    const method = (this as any)[promptMeta.method];
-    if (typeof method !== 'function') {
-      return err(
-        new JsonRpcError(
-          ErrorCodes.INTERNAL_ERROR,
-          ErrorMessages.METHOD_NOT_FOUND(promptMeta.method)
-        )
-      );
-    }
-
     if (promptMeta.params && promptMeta.params.length > 0) {
       const validation = validateParams(promptMeta.params, args);
       if (!validation.success) {
@@ -299,18 +230,9 @@ export abstract class MCPServer {
     }
 
     const argsObject = args as Record<string, unknown> | undefined;
-    const argsArray = promptMeta.params ? promptMeta.params.map((p) => argsObject?.[p.name]) : [];
-    const result = await method.apply(this, argsArray);
+    const argsArray = MethodInvoker.prepareArguments(promptMeta.params, argsObject);
 
-    if (result && typeof result === 'object' && 'isOk' in result) {
-      return result.mapErr((error: any) => {
-        const errorMessage =
-          typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
-        return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
-      });
-    }
-
-    return ok(result);
+    return MethodInvoker.invokeMethod(this, promptMeta.method, argsArray);
   }
 
   async subscribeToResource(clientId: string, uri: string): Promise<Result<void, JsonRpcError>> {
@@ -392,7 +314,7 @@ export abstract class MCPServer {
 
   registerPrompt(
     name: string,
-    handler: (...args: any[]) => Promise<Result<unknown, string>>,
+    handler: (...args: unknown[]) => Promise<Result<unknown, string>>,
     description?: string,
     params?: ParamMetadata[]
   ): Result<void, Error> {
@@ -448,45 +370,14 @@ export abstract class MCPServer {
   private async readResourceFromTemplate(
     uri: string,
     template: ResourceTemplateMetadata
-  ): Promise<Result<any, JsonRpcError>> {
-    const method = (this as any)[template.method];
-    if (typeof method !== 'function') {
-      return err(
-        new JsonRpcError(ErrorCodes.INTERNAL_ERROR, ErrorMessages.METHOD_NOT_FOUND(template.method))
-      );
-    }
-
+  ): Promise<Result<unknown, JsonRpcError>> {
     const params = { path: uri.split('/').pop() };
 
-    const result = await method.call(this, params);
-
-    if (result && typeof result === 'object' && 'isOk' in result) {
-      return result
-        .map((resourceData: any) => ({
-          contents: [
-            {
-              uri: uri,
-              mimeType: template.mimeType || 'application/json',
-              text: toTextContent(resourceData),
-            },
-          ],
-        }))
-        .mapErr((error: any) => {
-          const errorMessage =
-            typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
-          return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
-        });
-    }
-
-    return ok({
-      contents: [
-        {
-          uri: uri,
-          mimeType: template.mimeType || 'application/json',
-          text: toTextContent(result),
-        },
-      ],
-    });
+    return MethodInvoker.invokeMethod(this, template.method, [params]).then((result) =>
+      result.map((value) =>
+        MethodInvoker.createResourceResponse(uri, value, template.mimeType || 'application/json')
+      )
+    );
   }
 
   async getCompletion(
@@ -608,33 +499,42 @@ export abstract class MCPServer {
     return [];
   }
 
-  private initializeDynamicResources(): void {
+  private ensureDynamicResourcesInitialized(): void {
+    if (this.dynamicResourcesInitialized) {
+      return;
+    }
+
     const dynamicResourceMethods = getAllDynamicResourcesMetadata(this.constructor);
 
     dynamicResourceMethods.forEach((meta) => {
-      const method = (this as any)[meta.method];
+      const method = (this as Record<string, unknown>)[meta.method];
       if (typeof method === 'function') {
-        // Call the method to initialize dynamic resources
         method.call(this);
       }
     });
+
+    this.dynamicResourcesInitialized = true;
   }
 
-  private initializeDynamicPrompts(): void {
+  private ensureDynamicPromptsInitialized(): void {
+    if (this.dynamicPromptsInitialized) {
+      return;
+    }
+
     const dynamicPromptMethods = getAllDynamicPromptsMetadata(this.constructor);
 
     dynamicPromptMethods.forEach((meta) => {
-      const method = (this as any)[meta.method];
+      const method = (this as Record<string, unknown>)[meta.method];
       if (typeof method === 'function') {
-        // Call the method to initialize dynamic prompts
         method.call(this);
       }
     });
+
+    this.dynamicPromptsInitialized = true;
   }
 
   private findPromptTemplateMatch(name: string): PromptTemplateMetadata | null {
     for (const template of this.promptTemplates.values()) {
-      // Simple pattern matching - check if name matches template pattern
       const pattern = template.nameTemplate.replace(/{[^}]+}/g, '([^/]+)');
       const regex = new RegExp(`^${pattern}$`);
       if (regex.test(name)) {
@@ -648,15 +548,7 @@ export abstract class MCPServer {
     name: string,
     template: PromptTemplateMetadata,
     args?: unknown
-  ): Promise<Result<any, JsonRpcError>> {
-    const method = (this as any)[template.method];
-    if (typeof method !== 'function') {
-      return err(
-        new JsonRpcError(ErrorCodes.INTERNAL_ERROR, ErrorMessages.METHOD_NOT_FOUND(template.method))
-      );
-    }
-
-    // Extract parameters from the name based on the template
+  ): Promise<Result<unknown, JsonRpcError>> {
     const pattern = template.nameTemplate.replace(/{([^}]+)}/g, '(?<$1>[^/]+)');
     const regex = new RegExp(`^${pattern}$`);
     const match = name.match(regex);
@@ -664,16 +556,6 @@ export abstract class MCPServer {
     const params = match?.groups || {};
     const combinedArgs = { ...params, ...(args as object) };
 
-    const result = await method.call(this, combinedArgs);
-
-    if (result && typeof result === 'object' && 'isOk' in result) {
-      return result.mapErr((error: any) => {
-        const errorMessage =
-          typeof error === 'string' ? error : error.message || ErrorMessages.EXECUTION_FAILED;
-        return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, errorMessage);
-      });
-    }
-
-    return ok(result);
+    return MethodInvoker.invokeMethod(this, template.method, [combinedArgs]);
   }
 }

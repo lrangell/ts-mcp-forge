@@ -22,12 +22,12 @@ export class NotificationManager {
 
   async notifyResourceUpdate(uri: string): Promise<Result<void, Error>> {
     if (!this.sender) {
-      return ok(undefined); // No sender configured, silently succeed
+      return ok(undefined);
     }
 
     const subscribers = this.subscriptionManager.getSubscribers(uri);
     if (subscribers.length === 0) {
-      return ok(undefined); // No subscribers, nothing to notify
+      return ok(undefined);
     }
 
     const notification: ResourceUpdatedNotification = {
@@ -41,7 +41,7 @@ export class NotificationManager {
 
   async notifyListChanged(): Promise<Result<void, Error>> {
     if (!this.sender) {
-      return ok(undefined); // No sender configured, silently succeed
+      return ok(undefined);
     }
 
     const notification: ResourceListChangedNotification = {

@@ -3,8 +3,8 @@ import { forEach } from 'remeda';
 import { wrapSync } from '../utils/error-handling.js';
 
 export class SubscriptionManager {
-  private subscriptions: Map<string, Set<string>>; // uri -> client ids
-  private clientSubscriptions: Map<string, Set<string>>; // client id -> uris
+  private subscriptions: Map<string, Set<string>>;
+  private clientSubscriptions: Map<string, Set<string>>;
 
   constructor() {
     this.subscriptions = new Map();
@@ -14,13 +14,11 @@ export class SubscriptionManager {
   subscribe(clientId: string, uri: string): Result<void, Error> {
     return wrapSync(
       () => {
-        // Add to uri -> clients mapping
         if (!this.subscriptions.has(uri)) {
           this.subscriptions.set(uri, new Set());
         }
         this.subscriptions.get(uri)!.add(clientId);
 
-        // Add to client -> uris mapping
         if (!this.clientSubscriptions.has(clientId)) {
           this.clientSubscriptions.set(clientId, new Set());
         }
@@ -33,7 +31,6 @@ export class SubscriptionManager {
   unsubscribe(clientId: string, uri: string): Result<void, Error> {
     return wrapSync(
       () => {
-        // Remove from uri -> clients mapping
         const uriSubscribers = this.subscriptions.get(uri);
         if (uriSubscribers) {
           uriSubscribers.delete(clientId);
@@ -42,7 +39,6 @@ export class SubscriptionManager {
           }
         }
 
-        // Remove from client -> uris mapping
         const clientUris = this.clientSubscriptions.get(clientId);
         if (clientUris) {
           clientUris.delete(uri);

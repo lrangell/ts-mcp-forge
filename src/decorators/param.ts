@@ -2,8 +2,9 @@ import 'reflect-metadata';
 import { setParamMetadata } from './metadata.js';
 
 export function Param(description: string, name?: string) {
-  return function (target: any, propertyKey: string, parameterIndex: number) {
-    const funcStr = target[propertyKey].toString();
+  return function (target: object, propertyKey: string, parameterIndex: number) {
+    const method = (target as Record<string, unknown>)[propertyKey];
+    const funcStr = typeof method === 'function' ? method.toString() : '';
     const match = funcStr.match(/\(([^)]*)\)/);
     const paramNames = match
       ? match[1].split(',').map((p: string) => p.trim().split(/[:\s]/)[0])

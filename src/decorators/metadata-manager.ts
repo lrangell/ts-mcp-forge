@@ -13,21 +13,21 @@ export class MetadataManager<T> {
   /**
    * Sets metadata for a specific property
    */
-  set(target: any, propertyKey: string, metadata: T): void {
+  set(target: object, propertyKey: string, metadata: T): void {
     Reflect.defineMetadata(this.metadataKey, metadata, target, propertyKey);
   }
 
   /**
    * Gets metadata for a specific property
    */
-  get(target: any, propertyKey: string): T | undefined {
+  get(target: object, propertyKey: string): T | undefined {
     return Reflect.getMetadata(this.metadataKey, target, propertyKey);
   }
 
   /**
    * Gets all metadata of this type from a target
    */
-  getAll(target: any): Map<string, T> {
+  getAll(target: object): Map<string, T> {
     const metadata = new Map<string, T>();
     const prototype = typeof target === 'function' ? target.prototype : target;
 
@@ -49,14 +49,14 @@ export class MetadataManager<T> {
   /**
    * Checks if metadata exists for a property
    */
-  has(target: any, propertyKey: string): boolean {
+  has(target: object, propertyKey: string): boolean {
     return Reflect.hasMetadata(this.metadataKey, target, propertyKey);
   }
 
   /**
    * Deletes metadata for a property
    */
-  delete(target: any, propertyKey: string): boolean {
+  delete(target: object, propertyKey: string): boolean {
     return Reflect.deleteMetadata(this.metadataKey, target, propertyKey);
   }
 }

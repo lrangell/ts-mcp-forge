@@ -13,15 +13,15 @@ export interface ParamMetadata {
   index: number;
   name: string;
   description: string;
-  type?: any;
+  type?: unknown;
 }
 
 export interface ToolMetadata {
   name: string;
   description: string;
   method: string;
-  paramTypes?: any[];
-  returnType?: any;
+  paramTypes?: unknown[];
+  returnType?: unknown;
   params?: ParamMetadata[];
 }
 
@@ -63,16 +63,20 @@ export interface PromptTemplateMetadata {
   method: string;
 }
 
-export const setToolMetadata = (target: any, propertyKey: string, metadata: ToolMetadata): void => {
+export const setToolMetadata = (
+  target: object,
+  propertyKey: string,
+  metadata: ToolMetadata
+): void => {
   Reflect.defineMetadata(TOOL_METADATA, metadata, target, propertyKey);
 };
 
-export const getToolMetadata = (target: any, propertyKey: string): ToolMetadata | undefined => {
+export const getToolMetadata = (target: object, propertyKey: string): ToolMetadata | undefined => {
   return Reflect.getMetadata(TOOL_METADATA, target, propertyKey);
 };
 
 export const setResourceMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: ResourceMetadata
 ): void => {
@@ -80,14 +84,14 @@ export const setResourceMetadata = (
 };
 
 export const getResourceMetadata = (
-  target: any,
+  target: object,
   propertyKey: string
 ): ResourceMetadata | undefined => {
   return Reflect.getMetadata(RESOURCE_METADATA, target, propertyKey);
 };
 
 export const setResourceTemplateMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: ResourceTemplateMetadata
 ): void => {
@@ -95,26 +99,29 @@ export const setResourceTemplateMetadata = (
 };
 
 export const getResourceTemplateMetadata = (
-  target: any,
+  target: object,
   propertyKey: string
 ): ResourceTemplateMetadata | undefined => {
   return Reflect.getMetadata(RESOURCE_TEMPLATE_METADATA, target, propertyKey);
 };
 
 export const setPromptMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: PromptMetadata
 ): void => {
   Reflect.defineMetadata(PROMPT_METADATA, metadata, target, propertyKey);
 };
 
-export const getPromptMetadata = (target: any, propertyKey: string): PromptMetadata | undefined => {
+export const getPromptMetadata = (
+  target: object,
+  propertyKey: string
+): PromptMetadata | undefined => {
   return Reflect.getMetadata(PROMPT_METADATA, target, propertyKey);
 };
 
 export const setParamMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   index: number,
   metadata: Omit<ParamMetadata, 'index'>
@@ -124,12 +131,15 @@ export const setParamMetadata = (
   Reflect.defineMetadata(PARAM_METADATA, existing, target, propertyKey);
 };
 
-export const getParamMetadata = (target: any, propertyKey: string): ParamMetadata[] | undefined => {
+export const getParamMetadata = (
+  target: object,
+  propertyKey: string
+): ParamMetadata[] | undefined => {
   return Reflect.getMetadata(PARAM_METADATA, target, propertyKey);
 };
 
 export const setDynamicResourceMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: DynamicResourceMetadata
 ): void => {
@@ -137,14 +147,14 @@ export const setDynamicResourceMetadata = (
 };
 
 export const getDynamicResourceMetadata = (
-  target: any,
+  target: object,
   propertyKey: string
 ): DynamicResourceMetadata | undefined => {
   return Reflect.getMetadata(DYNAMIC_RESOURCE_METADATA, target, propertyKey);
 };
 
 export const setDynamicPromptMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: DynamicPromptMetadata
 ): void => {
@@ -152,14 +162,14 @@ export const setDynamicPromptMetadata = (
 };
 
 export const getDynamicPromptMetadata = (
-  target: any,
+  target: object,
   propertyKey: string
 ): DynamicPromptMetadata | undefined => {
   return Reflect.getMetadata(DYNAMIC_PROMPT_METADATA, target, propertyKey);
 };
 
 export const setPromptTemplateMetadata = (
-  target: any,
+  target: object,
   propertyKey: string,
   metadata: PromptTemplateMetadata
 ): void => {
@@ -167,15 +177,15 @@ export const setPromptTemplateMetadata = (
 };
 
 export const getPromptTemplateMetadata = (
-  target: any,
+  target: object,
   propertyKey: string
 ): PromptTemplateMetadata | undefined => {
   return Reflect.getMetadata(PROMPT_TEMPLATE_METADATA, target, propertyKey);
 };
 
-export const getAllToolsMetadata = (target: any): Map<string, ToolMetadata> => {
+export const getAllToolsMetadata = (target: object | Function): Map<string, ToolMetadata> => {
   const metadata = new Map<string, ToolMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -189,9 +199,11 @@ export const getAllToolsMetadata = (target: any): Map<string, ToolMetadata> => {
   return metadata;
 };
 
-export const getAllResourcesMetadata = (target: any): Map<string, ResourceMetadata> => {
+export const getAllResourcesMetadata = (
+  target: object | Function
+): Map<string, ResourceMetadata> => {
   const metadata = new Map<string, ResourceMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -205,9 +217,9 @@ export const getAllResourcesMetadata = (target: any): Map<string, ResourceMetada
   return metadata;
 };
 
-export const getAllPromptsMetadata = (target: any): Map<string, PromptMetadata> => {
+export const getAllPromptsMetadata = (target: object | Function): Map<string, PromptMetadata> => {
   const metadata = new Map<string, PromptMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -222,10 +234,10 @@ export const getAllPromptsMetadata = (target: any): Map<string, PromptMetadata> 
 };
 
 export const getAllResourceTemplatesMetadata = (
-  target: any
+  target: object | Function
 ): Map<string, ResourceTemplateMetadata> => {
   const metadata = new Map<string, ResourceTemplateMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -240,10 +252,10 @@ export const getAllResourceTemplatesMetadata = (
 };
 
 export const getAllDynamicResourcesMetadata = (
-  target: any
+  target: object | Function
 ): Map<string, DynamicResourceMetadata> => {
   const metadata = new Map<string, DynamicResourceMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -257,9 +269,11 @@ export const getAllDynamicResourcesMetadata = (
   return metadata;
 };
 
-export const getAllDynamicPromptsMetadata = (target: any): Map<string, DynamicPromptMetadata> => {
+export const getAllDynamicPromptsMetadata = (
+  target: object | Function
+): Map<string, DynamicPromptMetadata> => {
   const metadata = new Map<string, DynamicPromptMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
@@ -273,9 +287,11 @@ export const getAllDynamicPromptsMetadata = (target: any): Map<string, DynamicPr
   return metadata;
 };
 
-export const getAllPromptTemplatesMetadata = (target: any): Map<string, PromptTemplateMetadata> => {
+export const getAllPromptTemplatesMetadata = (
+  target: object | Function
+): Map<string, PromptTemplateMetadata> => {
   const metadata = new Map<string, PromptTemplateMetadata>();
-  const prototype = target.prototype || target;
+  const prototype = typeof target === 'function' ? target.prototype : target;
 
   Object.getOwnPropertyNames(prototype).forEach((propertyKey) => {
     if (propertyKey === 'constructor') return;
