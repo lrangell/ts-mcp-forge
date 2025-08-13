@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.4.0...v0.5.0) (2025-08-13)
+
+### Features
+
+* add dynamic prompt and resource registration support ([f618090](https://github.com/lrangell/ts-mcp-forge/commit/f618090a39471396567f339742ddc1444e8ab194))
+
+### Refactoring
+
+* add validation factory for router ([f072a18](https://github.com/lrangell/ts-mcp-forge/commit/f072a186b4633bf358453e89e2c551019f8748b4))
+* improve transport layer with base class and neverthrow patterns ([5746881](https://github.com/lrangell/ts-mcp-forge/commit/574688100f7f72ce9939ce8642ff6ce9c13e3b85))
+
 ## [0.4.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.3.0...v0.4.0) (2025-08-13)
 
 ### Features
