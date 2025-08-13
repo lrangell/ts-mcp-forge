@@ -1,6 +1,6 @@
 {
   "name": "ts-mcp-forge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A TypeScript framework for building MCP (Model Context Protocol) servers with decorators",
   "keywords": [
     "mcp",
