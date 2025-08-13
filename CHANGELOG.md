@@ -4,7 +4,7 @@
 
 ### Refactoring
 
-* implement lazy initialization and simplify Result handling ([b885974](https://github.com/lrangell/ts-mcp-forge/commit/b8859744b37bb2e0194a42537f66cd45f828f0a3))
+- implement lazy initialization and simplify Result handling ([b885974](https://github.com/lrangell/ts-mcp-forge/commit/b8859744b37bb2e0194a42537f66cd45f828f0a3))
 
 ## [0.5.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.4.0...v0.5.0) (2025-08-13)
 
