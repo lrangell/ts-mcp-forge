@@ -3,6 +3,7 @@ import { match } from 'ts-pattern';
 import { MCPServer } from './server.js';
 import { JsonRpcError, ErrorCodes, MessageHandler } from './jsonrpc.js';
 import { Logger } from '../utils/logger.js';
+import { createRequiredFieldValidator, createValidator } from './validation-factory.js';
 
 export enum MCPMethod {
   INITIALIZE = 'initialize',
@@ -52,59 +53,32 @@ interface CompletionCompleteParams {
   };
 }
 
-const validateToolCall = (params: unknown): Result<ToolCallParams, JsonRpcError> => {
-  const toolParams = params as ToolCallParams;
-  if (!toolParams.name) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Tool name is required'));
-  }
-  return ok(toolParams);
-};
+// Create validators using the factory pattern for cleaner code
+const validateToolCall = createRequiredFieldValidator<ToolCallParams>(
+  'name',
+  'Tool name is required'
+);
+const validateResourceRead = createRequiredFieldValidator<ResourceReadParams>(
+  'uri',
+  'Resource URI is required'
+);
+const validatePromptGet = createRequiredFieldValidator<PromptGetParams>(
+  'name',
+  'Prompt name is required'
+);
+const validateResourceSubscribe = createRequiredFieldValidator<ResourceSubscribeParams>(
+  'uri',
+  'Resource URI is required'
+);
+const validateResourceUnsubscribe = createRequiredFieldValidator<ResourceUnsubscribeParams>(
+  'uri',
+  'Resource URI is required'
+);
 
-const validateResourceRead = (params: unknown): Result<ResourceReadParams, JsonRpcError> => {
-  const resourceParams = params as ResourceReadParams;
-  if (!resourceParams.uri) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Resource URI is required'));
-  }
-  return ok(resourceParams);
-};
-
-const validatePromptGet = (params: unknown): Result<PromptGetParams, JsonRpcError> => {
-  const promptParams = params as PromptGetParams;
-  if (!promptParams.name) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Prompt name is required'));
-  }
-  return ok(promptParams);
-};
-
-const validateResourceSubscribe = (
-  params: unknown
-): Result<ResourceSubscribeParams, JsonRpcError> => {
-  const subscribeParams = params as ResourceSubscribeParams;
-  if (!subscribeParams.uri) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Resource URI is required'));
-  }
-  return ok(subscribeParams);
-};
-
-const validateResourceUnsubscribe = (
-  params: unknown
-): Result<ResourceUnsubscribeParams, JsonRpcError> => {
-  const unsubscribeParams = params as ResourceUnsubscribeParams;
-  if (!unsubscribeParams.uri) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Resource URI is required'));
-  }
-  return ok(unsubscribeParams);
-};
-
-const validateCompletionComplete = (
-  params: unknown
-): Result<CompletionCompleteParams, JsonRpcError> => {
-  const completionParams = params as CompletionCompleteParams;
-  if (!completionParams.ref || !completionParams.argument) {
-    return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Ref and argument are required'));
-  }
-  return ok(completionParams);
-};
+const validateCompletionComplete = createValidator<CompletionCompleteParams>([
+  { field: 'ref', errorMessage: 'Ref is required' },
+  { field: 'argument', errorMessage: 'Argument is required' },
+]);
 
 export const createMCPRouter = (server: MCPServer): MessageHandler => {
   const logger = new Logger('Router');
