@@ -76,6 +76,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",
+    "@fastify/one-line-logger": "^2.0.2",
     "fastify": "^5.0.0",
     "fastify-sse-v2": "^4.0.0",
     "neverthrow": "^7.0.0",

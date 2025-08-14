@@ -14,6 +14,7 @@ export class HTTPTransport extends BaseTransport<HTTPTransportOptions> {
         host: 'localhost',
         path: '/mcp',
         cors: true,
+        logLevel: 'silent',
       },
       'HTTPTransport'
     );

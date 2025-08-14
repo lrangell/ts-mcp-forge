@@ -14,6 +14,7 @@ export class SSETransport extends BaseTransport<SSETransportOptions> {
         host: 'localhost',
         path: '/mcp/sse',
         cors: true,
+        logLevel: 'silent',
       },
       'SSETransport'
     );

@@ -9,6 +9,7 @@ export interface BaseTransportOptions {
   host?: string;
   path?: string;
   cors?: boolean | object;
+  logLevel?: 'silent' | 'error' | 'warn' | 'info' | 'debug';
 }
 
 export abstract class BaseTransport<T extends BaseTransportOptions = BaseTransportOptions> {
@@ -22,8 +23,18 @@ export abstract class BaseTransport<T extends BaseTransportOptions = BaseTranspo
   }
 
   protected async createFastifyApp(): Promise<FastifyInstance> {
+    const logLevel = this.options.logLevel || process.env.LOG_LEVEL || 'silent';
+
     const app = Fastify({
-      logger: process.env.LOG_LEVEL === 'debug',
+      logger:
+        logLevel !== 'silent'
+          ? {
+              level: logLevel,
+              transport: {
+                target: '@fastify/one-line-logger',
+              },
+            }
+          : false,
     });
 
     if (this.options.cors) {
