@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.5.1...v0.6.0) (2025-08-14)
+
+### Features
+
+* add configurable logging to Fastify transports ([4218cdd](https://github.com/lrangell/ts-mcp-forge/commit/4218cdd80cdfeb6e9aea733e3f3e4e5d186a9794))
+* implement comprehensive MCP protocol compliance framework ([e966ec9](https://github.com/lrangell/ts-mcp-forge/commit/e966ec99db2d3397fffa4bf91da538c9baa28a1f))
+
+### Style
+
+* fix changelog formatting ([8e1aeb0](https://github.com/lrangell/ts-mcp-forge/commit/8e1aeb01468fa23824d39b451afa11b2e1316dbc))
+
+### Refactoring
+
+* adopt neverthrow Railway Oriented Programming patterns ([78172a3](https://github.com/lrangell/ts-mcp-forge/commit/78172a329fe10709071feb1358a31d9dbda29f14))
+
+### Tests
+
+* add comprehensive MCP protocol compliance test suite ([e75935f](https://github.com/lrangell/ts-mcp-forge/commit/e75935f1fd0df082486fae2e357d2b5b32ff615b))
+
 ## [0.5.1](https://github.com/lrangell/ts-mcp-forge/compare/v0.5.0...v0.5.1) (2025-08-13)
 
 ### Refactoring
