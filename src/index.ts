@@ -35,7 +35,35 @@ export type {
   ResourceUpdatedNotification,
   CompletionResponse,
 } from './core/protocol.js';
-export { JsonRpcError, ErrorCodes } from './core/jsonrpc.js';
+// MCP-compliant error system
+export {
+  // Error builders
+  PromptErrors,
+  ResourceErrors,
+  ToolErrors,
+  CompletionErrors,
+  GeneralErrors,
+  // Type constraints
+  PromptError,
+  ResourceError,
+  ToolError,
+  CompletionError,
+  MCPError,
+  // Result type aliases
+  PromptResult,
+  ResourceResult,
+  ToolResult,
+  CompletionResult,
+  MCPResult,
+  // Utilities
+  isMcpError,
+  wrapError,
+  // Error constants
+  RESOURCE_NOT_FOUND_CODE,
+  // Re-export SDK error types
+  McpError,
+  ErrorCode,
+} from './core/mcp-errors.js';
 export { Result, ok, err } from 'neverthrow';
 export { SubscriptionManager } from './core/subscription-manager.js';
 export { NotificationManager, type NotificationSender } from './core/notifications.js';

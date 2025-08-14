@@ -9,6 +9,11 @@ dist-test/
 build/
 *.tsbuildinfo
 
+# TypeScript compiled files in src (should only be in dist)
+src/**/*.js
+src/**/*.js.map
+src/**/*.d.ts
+
 # Testing
 coverage/
 .nyc_output
@@ -52,3 +57,4 @@ erl_crash.dump
 
 # User-specific files
 claude.md
+.serena/

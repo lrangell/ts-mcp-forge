@@ -1,5 +1,6 @@
 import { Result, ok, err, ResultAsync } from 'neverthrow';
-import { JsonRpcError, ErrorCodes } from '../core/jsonrpc.js';
+import { McpError, GeneralErrors } from '../core/mcp-errors.js';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 const ErrorMessages = {
   EXECUTION_FAILED: 'Execution failed',
@@ -18,28 +19,23 @@ export function extractErrorMessage(error: unknown, defaultMessage = 'Execution 
   return defaultMessage;
 }
 
-export function toJsonRpcError<T>(
+export function toMcpError<T>(
   result: Result<T, unknown>,
-  code = ErrorCodes.INTERNAL_ERROR,
+  code = ErrorCode.InternalError,
   defaultMessage = ErrorMessages.EXECUTION_FAILED
-): Result<T, JsonRpcError> {
-  return result.mapErr(
-    (error) => new JsonRpcError(code, extractErrorMessage(error, defaultMessage))
-  );
+): Result<T, McpError> {
+  return result.mapErr((error) => new McpError(code, extractErrorMessage(error, defaultMessage)));
 }
 
-export function createValidationError(field: string): JsonRpcError {
-  return new JsonRpcError(ErrorCodes.INVALID_PARAMS, `${field} is required`);
+export function createValidationError(field: string): McpError {
+  return GeneralErrors.invalidParams(`${field} is required`);
 }
 
-export function createMethodNotFoundError(methodName: string): JsonRpcError {
-  return new JsonRpcError(ErrorCodes.INTERNAL_ERROR, `Method '${methodName}' not found`);
+export function createMethodNotFoundError(methodName: string): McpError {
+  return GeneralErrors.methodNotFound(`Method '${methodName}' not found`);
 }
 
-export function getMethodOrError(
-  target: unknown,
-  methodName: string
-): Result<Function, JsonRpcError> {
+export function getMethodOrError(target: unknown, methodName: string): Result<Function, McpError> {
   const method = (target as Record<string, unknown>)[methodName];
   if (typeof method !== 'function') {
     return err(createMethodNotFoundError(methodName));
@@ -67,14 +63,12 @@ export function wrapSync<T>(
   }
 }
 
-export function jsonRpcErrorResponse(
+export function mcpErrorResponse(
   id: string | number | null,
-  error: JsonRpcError | Error | string
+  error: McpError | Error | string
 ): unknown {
   const errorObj =
-    error instanceof JsonRpcError
-      ? error
-      : new JsonRpcError(ErrorCodes.INTERNAL_ERROR, extractErrorMessage(error));
+    error instanceof McpError ? error : GeneralErrors.internalError(extractErrorMessage(error));
 
   return {
     jsonrpc: '2.0',

@@ -10,6 +10,15 @@ export function toTextContent(value: unknown): string {
   if (value === undefined) {
     return 'undefined';
   }
+  // Handle special numeric values directly
+  if (typeof value === 'number') {
+    if (!isFinite(value)) {
+      if (isNaN(value)) {
+        return 'NaN';
+      }
+      return value > 0 ? 'Infinity' : '-Infinity';
+    }
+  }
   const stringified = safeJsonStringify(value);
   return stringified.unwrapOr(String(value));
 }
@@ -33,7 +42,19 @@ export function tryParseJsonLegacy<T = unknown>(text: string): T | null {
 
 export function safeJsonStringify(value: unknown): Result<string, Error> {
   return Result.fromThrowable(
-    () => JSON.stringify(value),
+    () =>
+      JSON.stringify(value, (_key, val) => {
+        // Handle special numeric values that JSON.stringify converts to null
+        if (typeof val === 'number') {
+          if (!isFinite(val)) {
+            if (isNaN(val)) {
+              return 'NaN';
+            }
+            return val > 0 ? 'Infinity' : '-Infinity';
+          }
+        }
+        return val;
+      }),
     (error) =>
       new Error(
         `Failed to stringify JSON: ${error instanceof Error ? error.message : 'Unknown error'}`

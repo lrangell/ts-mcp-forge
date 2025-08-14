@@ -1,11 +1,12 @@
 import { Result, ok, err } from 'neverthrow';
-import { JsonRpcError, ErrorCodes } from './jsonrpc.js';
+import { McpError } from './mcp-errors.js';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Configuration for a field validation
  */
 interface FieldValidation {
-  field: string;
+  fieldName: string;
   errorMessage: string;
   optional?: boolean;
   validator?: (value: unknown) => boolean;
@@ -14,28 +15,35 @@ interface FieldValidation {
 /**
  * Creates a validation function for a specific parameter type using Railway Oriented Programming
  * @param validations Array of field validations to perform
- * @returns A validation function that returns Result<T, JsonRpcError>
+ * @returns A validation function that returns Result<T, McpError>
  */
 export function createValidator<T>(
   validations: FieldValidation[]
-): (params: unknown) => Result<T, JsonRpcError> {
-  return (params: unknown): Result<T, JsonRpcError> => {
+): (params: unknown) => Result<T, McpError> {
+  return (params: unknown): Result<T, McpError> => {
+    // Handle case where params is null/undefined but all fields are optional
     if (!params || typeof params !== 'object') {
-      return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Parameters must be an object'));
+      const hasRequiredFields = validations.some((v) => !v.optional);
+      if (hasRequiredFields) {
+        return err(new McpError(ErrorCode.InvalidParams, 'Parameters must be an object'));
+      } else {
+        // All fields are optional, return empty object
+        return ok({} as T);
+      }
     }
 
     const typedParams = params as Record<string, unknown>;
 
     for (const validation of validations) {
-      const value = typedParams[validation.field];
+      const value = typedParams[validation.fieldName];
 
       if (!validation.optional && (value === undefined || value === null || value === '')) {
-        return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, validation.errorMessage));
+        return err(new McpError(ErrorCode.InvalidParams, validation.errorMessage));
       }
 
       if (value !== undefined && value !== null && validation.validator) {
         if (!validation.validator(value)) {
-          return err(new JsonRpcError(ErrorCodes.INVALID_PARAMS, validation.errorMessage));
+          return err(new McpError(ErrorCode.InvalidParams, validation.errorMessage));
         }
       }
     }
@@ -53,10 +61,10 @@ export function createValidator<T>(
 export function createRequiredFieldValidator<T>(
   fieldName: string,
   errorMessage?: string
-): (params: unknown) => Result<T, JsonRpcError> {
+): (params: unknown) => Result<T, McpError> {
   return createValidator<T>([
     {
-      field: fieldName,
+      fieldName,
       errorMessage: errorMessage || `${fieldName} is required`,
     },
   ]);
@@ -69,10 +77,10 @@ export function createRequiredFieldValidator<T>(
  */
 export function createMultiFieldValidator<T>(
   requiredFields: Record<string, string>
-): (params: unknown) => Result<T, JsonRpcError> {
+): (params: unknown) => Result<T, McpError> {
   const validations: FieldValidation[] = Object.entries(requiredFields).map(
-    ([field, errorMessage]) => ({
-      field,
+    ([fieldName, errorMessage]) => ({
+      fieldName,
       errorMessage,
     })
   );
@@ -86,10 +94,10 @@ export function createMultiFieldValidator<T>(
  * @returns A combined validation function
  */
 export function chainValidators<T>(
-  ...validators: Array<(params: unknown) => Result<T, JsonRpcError>>
-): (params: unknown) => Result<T, JsonRpcError> {
-  return (params: unknown): Result<T, JsonRpcError> => {
-    let result: Result<T, JsonRpcError> = ok(params as T);
+  ...validators: Array<(params: unknown) => Result<T, McpError>>
+): (params: unknown) => Result<T, McpError> {
+  return (params: unknown): Result<T, McpError> => {
+    let result: Result<T, McpError> = ok(params as T);
 
     for (const validator of validators) {
       result = result.andThen(() => validator(params));

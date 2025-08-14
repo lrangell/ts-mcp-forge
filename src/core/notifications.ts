@@ -31,12 +31,17 @@ export class NotificationManager {
     }
 
     const notification: ResourceUpdatedNotification = {
-      jsonrpc: '2.0',
       method: 'notifications/resources/updated',
       params: { uri },
     };
 
-    return this.sender.sendNotification(notification);
+    // Wrap in JSONRPCNotification for transport
+    const jsonrpcNotification: Notification = {
+      jsonrpc: '2.0',
+      ...notification,
+    };
+
+    return this.sender.sendNotification(jsonrpcNotification);
   }
 
   async notifyListChanged(): Promise<Result<void, Error>> {
@@ -45,11 +50,16 @@ export class NotificationManager {
     }
 
     const notification: ResourceListChangedNotification = {
-      jsonrpc: '2.0',
       method: 'notifications/resources/list_changed',
     };
 
-    return this.sender.sendNotification(notification);
+    // Wrap in JSONRPCNotification for transport
+    const jsonrpcNotification: Notification = {
+      jsonrpc: '2.0',
+      ...notification,
+    };
+
+    return this.sender.sendNotification(jsonrpcNotification);
   }
 
   async notifyMultipleUpdates(uris: string[]): Promise<Result<void, Error>> {
