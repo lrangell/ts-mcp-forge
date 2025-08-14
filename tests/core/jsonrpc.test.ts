@@ -6,9 +6,8 @@ import {
   createErrorResponse,
   handleJsonRpcMessage,
   handleJsonRpcBatch,
-  JsonRpcError,
-  ErrorCodes,
 } from '../../src/core/jsonrpc.js';
+import { McpError, ErrorCode } from '../../src/index.js';
 
 describe('JSON-RPC Handler', () => {
   describe('parseJsonRpcMessage', () => {
@@ -47,7 +46,7 @@ describe('JSON-RPC Handler', () => {
       const result = parseJsonRpcMessage('invalid json');
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.PARSE_ERROR);
+        expect(result.error.code).toBe(ErrorCode.ParseError);
       }
     });
 
@@ -60,7 +59,7 @@ describe('JSON-RPC Handler', () => {
       const result = parseJsonRpcMessage(message);
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.INVALID_REQUEST);
+        expect(result.error.code).toBe(ErrorCode.InvalidRequest);
       }
     });
   });
@@ -84,7 +83,7 @@ describe('JSON-RPC Handler', () => {
 
   describe('createErrorResponse', () => {
     it('should create error response', () => {
-      const error = new JsonRpcError(ErrorCodes.METHOD_NOT_FOUND, 'Method not found', {
+      const error = new McpError(ErrorCode.MethodNotFound, 'Method not found', {
         method: 'unknown',
       });
       const response = createErrorResponse(1, error);
@@ -93,8 +92,8 @@ describe('JSON-RPC Handler', () => {
         jsonrpc: '2.0',
         id: 1,
         error: {
-          code: ErrorCodes.METHOD_NOT_FOUND,
-          message: 'Method not found',
+          code: ErrorCode.MethodNotFound,
+          message: 'MCP error -32601: Method not found',
           data: { method: 'unknown' },
         },
       });
@@ -128,7 +127,7 @@ describe('JSON-RPC Handler', () => {
 
     it('should handle handler error', async () => {
       const handler = async () => {
-        return err(new JsonRpcError(ErrorCodes.INTERNAL_ERROR, 'Something went wrong'));
+        return err(new McpError(ErrorCode.InternalError, 'Something went wrong'));
       };
 
       const message = JSON.stringify({
@@ -141,8 +140,9 @@ describe('JSON-RPC Handler', () => {
       const parsed = JSON.parse(response);
 
       expect(parsed.error).toBeDefined();
-      expect(parsed.error.code).toBe(ErrorCodes.INTERNAL_ERROR);
-      expect(parsed.error.message).toBe('Something went wrong');
+      expect(parsed.error.code).toBe(ErrorCode.InternalError);
+      // McpError adds "MCP error" prefix to messages
+      expect(parsed.error.message).toContain('Something went wrong');
     });
 
     it('should handle parse error', async () => {
@@ -152,7 +152,7 @@ describe('JSON-RPC Handler', () => {
       const parsed = JSON.parse(response);
 
       expect(parsed.id).toBe(0); // Default id for parse errors
-      expect(parsed.error.code).toBe(ErrorCodes.PARSE_ERROR);
+      expect(parsed.error.code).toBe(ErrorCode.ParseError);
     });
   });
 
@@ -161,7 +161,7 @@ describe('JSON-RPC Handler', () => {
       const handler = async (method: string) => {
         if (method === 'method1') return ok('result1');
         if (method === 'method2') return ok('result2');
-        return err(new JsonRpcError(ErrorCodes.METHOD_NOT_FOUND, 'Unknown method'));
+        return err(new McpError(ErrorCode.MethodNotFound, 'Unknown method'));
       };
 
       const messages = [
@@ -182,7 +182,7 @@ describe('JSON-RPC Handler', () => {
     it('should handle mixed success and error in batch', async () => {
       const handler = async (method: string) => {
         if (method === 'valid') return ok('success');
-        return err(new JsonRpcError(ErrorCodes.METHOD_NOT_FOUND, 'Not found'));
+        return err(new McpError(ErrorCode.MethodNotFound, 'Not found'));
       };
 
       const messages = [
@@ -198,25 +198,26 @@ describe('JSON-RPC Handler', () => {
 
       const parsed2 = JSON.parse(responses[1]);
       expect(parsed2.error).toBeDefined();
-      expect(parsed2.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+      expect(parsed2.error.code).toBe(ErrorCode.MethodNotFound);
     });
   });
 
-  describe('JsonRpcError', () => {
+  describe('McpError', () => {
     it('should create error with all properties', () => {
-      const error = new JsonRpcError(-32000, 'Custom error', { detail: 'info' });
+      const error = new McpError(-32000, 'Custom error', { detail: 'info' });
 
       expect(error.code).toBe(-32000);
-      expect(error.message).toBe('Custom error');
+      // McpError adds "MCP error" prefix to messages
+      expect(error.message).toContain('Custom error');
       expect(error.data).toEqual({ detail: 'info' });
-      expect(error.name).toBe('JsonRpcError');
     });
 
     it('should work without data', () => {
-      const error = new JsonRpcError(ErrorCodes.INVALID_PARAMS, 'Invalid params');
+      const error = new McpError(ErrorCode.InvalidParams, 'Invalid params');
 
-      expect(error.code).toBe(ErrorCodes.INVALID_PARAMS);
-      expect(error.message).toBe('Invalid params');
+      expect(error.code).toBe(ErrorCode.InvalidParams);
+      // McpError adds "MCP error" prefix to messages
+      expect(error.message).toContain('Invalid params');
       expect(error.data).toBeUndefined();
     });
   });

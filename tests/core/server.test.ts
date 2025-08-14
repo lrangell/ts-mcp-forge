@@ -11,7 +11,7 @@ import {
   PromptTemplate,
 } from '../../src/decorators/index.js';
 import { createMCPRouter } from '../../src/core/router.js';
-import { ErrorCodes } from '../../src/core/jsonrpc.js';
+import { ErrorCode, RESOURCE_NOT_FOUND_CODE } from '../../src/index.js';
 
 class TestServer extends MCPServer {
   constructor() {
@@ -148,7 +148,7 @@ describe('MCPServer', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.INTERNAL_ERROR);
+        expect(result.error.code).toBe(ErrorCode.InternalError);
         expect(result.error.message).toContain('Tool error');
       }
     });
@@ -158,7 +158,7 @@ describe('MCPServer', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+        expect(result.error.code).toBe(ErrorCode.MethodNotFound);
         expect(result.error.message).toContain('not found');
       }
     });
@@ -168,7 +168,7 @@ describe('MCPServer', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.INVALID_PARAMS);
+        expect(result.error.code).toBe(ErrorCode.InvalidParams);
       }
     });
   });
@@ -208,7 +208,7 @@ describe('MCPServer', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+        expect(result.error.code).toBe(RESOURCE_NOT_FOUND_CODE);
       }
     });
   });
@@ -228,7 +228,7 @@ describe('MCPServer', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+        expect(result.error.code).toBe(ErrorCode.MethodNotFound);
       }
     });
   });
@@ -342,7 +342,7 @@ describe('MCPRouter', () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+      expect(result.error.code).toBe(ErrorCode.MethodNotFound);
     }
   });
 
@@ -351,7 +351,7 @@ describe('MCPRouter', () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
-      expect(result.error.code).toBe(ErrorCodes.INVALID_PARAMS);
+      expect(result.error.code).toBe(ErrorCode.InvalidParams);
       expect(result.error.message).toContain('name is required');
     }
   });
@@ -481,7 +481,7 @@ describe('Dynamic Prompts', () => {
 
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error.code).toBe(ErrorCodes.METHOD_NOT_FOUND);
+        expect(result.error.code).toBe(ErrorCode.MethodNotFound);
       }
     });
   });

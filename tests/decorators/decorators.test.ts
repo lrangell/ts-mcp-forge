@@ -133,7 +133,7 @@ describe('Decorators', () => {
           @Param('First parameter') first: string,
           @Param('Second parameter') second: number
         ): void {
-          console.log(first, second);
+          // Test placeholder method
         }
       }
 
@@ -155,7 +155,7 @@ describe('Decorators', () => {
       class TestServer {
         @Tool('test', 'Test')
         testMethod(@Param('Description', 'customName') param: string): void {
-          console.log(param);
+          // Test placeholder method
         }
       }
 
