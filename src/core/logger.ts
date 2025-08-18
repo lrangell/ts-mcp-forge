@@ -13,14 +13,14 @@ export interface Logger {
   warn(...args: unknown[]): void;
   error(...args: unknown[]): void;
   fatal(...args: unknown[]): void;
-  
+
   // Additional methods
   success?(...args: unknown[]): void;
   verbose?(...args: unknown[]): void;
   ready?(...args: unknown[]): void;
   start?(...args: unknown[]): void;
   box?(...args: unknown[]): void;
-  
+
   // Utilities
   silent?(...args: unknown[]): void;
   clear?(): void;
@@ -54,12 +54,12 @@ export function isValidLogger(logger: unknown): logger is Logger {
   if (!logger || typeof logger !== 'object') {
     return false;
   }
-  
+
   const log = logger as Record<string, unknown>;
-  
+
   // Check for required methods
   const requiredMethods = ['debug', 'info', 'warn', 'error'];
-  return requiredMethods.every(method => typeof log[method] === 'function');
+  return requiredMethods.every((method) => typeof log[method] === 'function');
 }
 
 /**

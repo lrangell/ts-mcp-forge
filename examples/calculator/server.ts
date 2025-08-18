@@ -14,7 +14,9 @@ const server = new CalculatorServer();
 
 new ForgeServer(server)
   .setTransport(new StdioTransport())
-  .setInstructions('Calculator server providing arithmetic operations including addition, subtraction, multiplication, and division.')
+  .setInstructions(
+    'Calculator server providing arithmetic operations including addition, subtraction, multiplication, and division.'
+  )
   .setLogger(logger)
   .start()
   .catch((error) => {

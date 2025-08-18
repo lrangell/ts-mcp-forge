@@ -332,15 +332,17 @@ Focus on:
 // Start the server
 async function main() {
   const logger = createDefaultLogger('AdvancedResourcesServer');
-  
+
   logger.info('Starting Advanced Resources MCP Server...');
 
   const server = new AdvancedResourcesServer();
-  
+
   await new ForgeServer(server)
     .setTransport(new StdioTransport())
     .setLogger(logger)
-    .setInstructions('Advanced Resources Server demonstrating subscribable resources, templates, and dynamic registration')
+    .setInstructions(
+      'Advanced Resources Server demonstrating subscribable resources, templates, and dynamic registration'
+    )
     .start();
 }
 
