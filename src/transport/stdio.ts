@@ -5,7 +5,7 @@ import { createMCPRouter } from '../core/router.js';
 import { handleJsonRpcMessage } from '../core/jsonrpc.js';
 import { Notification } from '../core/protocol.js';
 import { BaseNotificationSender } from '../utils/base-notification-sender.js';
-import { Logger } from '../utils/logger.js';
+import { createDefaultLogger } from '../core/logger.js';
 import { safeStringify } from '../utils/string-conversion.js';
 
 class StdioNotificationSender extends BaseNotificationSender {
@@ -21,7 +21,7 @@ class StdioNotificationSender extends BaseNotificationSender {
 }
 
 export const runStdioServer = async (server: MCPServer) => {
-  const logger = new Logger('StdioServer');
+  const logger = createDefaultLogger('StdioServer');
   const router = createMCPRouter(server);
   const notificationSender = new StdioNotificationSender();
   server.setNotificationSender(notificationSender);

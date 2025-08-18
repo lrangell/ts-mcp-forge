@@ -1,4 +1,5 @@
 import { MCPServer } from './server.js';
+import { Logger } from './logger.js';
 
 /**
  * Transport interface for MCP servers
@@ -31,6 +32,15 @@ export class ForgeServer<T extends MCPServer> {
    */
   setInstructions(instructions: string): this {
     this.server.setInstructions(instructions);
+    return this;
+  }
+
+  /**
+   * Set a custom logger implementation for the server
+   * @param logger The logger to use (must implement Logger interface)
+   */
+  setLogger(logger: Logger): this {
+    this.server.setLogger(logger);
     return this;
   }
 

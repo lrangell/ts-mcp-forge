@@ -1,4 +1,12 @@
 export { MCPServer } from './core/server.js';
+export { ForgeServer, type Transport } from './core/forge-server.js';
+export {
+  type Logger,
+  createDefaultLogger,
+  createNoOpLogger,
+  createConsoleLogger,
+  isValidLogger,
+} from './core/logger.js';
 export {
   Tool,
   Resource,

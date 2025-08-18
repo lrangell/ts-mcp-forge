@@ -3,7 +3,7 @@ import { match } from 'ts-pattern';
 import { MCPServer } from './server.js';
 import { MessageHandler } from './jsonrpc.js';
 import { GeneralErrors, McpError } from './mcp-errors.js';
-import { Logger } from '../utils/logger.js';
+import { createDefaultLogger } from './logger.js';
 import { createValidator } from './validation-factory.js';
 
 export enum MCPMethod {
@@ -109,7 +109,7 @@ const validateCompletionComplete = createValidator<CompletionCompleteParams>([
 ]);
 
 export const createMCPRouter = (server: MCPServer): MessageHandler => {
-  const logger = new Logger('Router');
+  const logger = createDefaultLogger('Router');
 
   // Cache the server capabilities
   let capabilities: Record<string, any> | null = null;

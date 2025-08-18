@@ -40,8 +40,13 @@ import { NotificationManager, NotificationSender } from './notifications.js';
 import { wrapSync } from '../utils/error-handling.js';
 import { MethodInvoker } from '../utils/method-invoker.js';
 import { resolveMimeType } from '../utils/mime-type.js';
+import { Logger, createDefaultLogger, isValidLogger } from './logger.js';
 
 // ErrorMessages removed - using domain-specific error builders from mcp-errors.ts
+
+interface ExtendedInitializeResponse extends InitializeResponse {
+  instructions?: string;
+}
 
 export abstract class MCPServer {
   private tools: Map<string, ToolMetadata>;
@@ -55,6 +60,8 @@ export abstract class MCPServer {
   private notificationManager: NotificationManager;
   private dynamicResourcesInitialized: boolean = false;
   private dynamicPromptsInitialized: boolean = false;
+  protected logger: Logger;
+  private instructions?: string;
 
   constructor(
     private serverName: string = 'MCP Server',
@@ -69,9 +76,33 @@ export abstract class MCPServer {
     this.dynamicPrompts = new Map();
     this.subscriptionManager = new SubscriptionManager();
     this.notificationManager = new NotificationManager(null, this.subscriptionManager);
+    this.logger = createDefaultLogger(this.serverName);
   }
 
-  handleInitialize(): InitializeResponse {
+  /**
+   * Set a custom logger implementation
+   * @param logger The logger to use (must implement Logger interface)
+   * @returns This server instance for chaining
+   */
+  setLogger(logger: Logger): this {
+    if (!isValidLogger(logger)) {
+      throw new Error('Invalid logger: must implement debug, info, warn, and error methods');
+    }
+    this.logger = logger;
+    return this;
+  }
+
+  /**
+   * Set instructions for the server that will be included in the initialization response
+   * @param instructions Instructions describing how to use the server and its features
+   * @returns This server instance for chaining
+   */
+  setInstructions(instructions: string): this {
+    this.instructions = instructions;
+    return this;
+  }
+
+  handleInitialize(): ExtendedInitializeResponse {
     this.ensureDynamicResourcesInitialized();
     this.ensureDynamicPromptsInitialized();
 
@@ -105,7 +136,7 @@ export abstract class MCPServer {
       capabilities.prompts = {};
     }
 
-    return {
+    const result: ExtendedInitializeResponse = {
       protocolVersion: '2025-06-18',
       capabilities,
       serverInfo: {
@@ -113,6 +144,12 @@ export abstract class MCPServer {
         version: this.serverVersion,
       },
     };
+
+    if (this.instructions) {
+      result.instructions = this.instructions;
+    }
+
+    return result;
   }
 
   listTools(_cursor?: string): Tool[] | { tools: Tool[]; nextCursor?: string } {

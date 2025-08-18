@@ -17,6 +17,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.17.3
         version: 1.17.3
+      consola:
+        specifier: ^3.4.2
+        version: 3.4.2
       fastify:
         specifier: ^5.0.0
         version: 5.4.0

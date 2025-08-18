@@ -2,7 +2,7 @@ import Fastify, { FastifyInstance } from 'fastify';
 import FastifyCors from '@fastify/cors';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../core/server.js';
-import { Logger } from '../utils/logger.js';
+import { createDefaultLogger, type Logger } from '../core/logger.js';
 
 export interface BaseTransportOptions {
   port?: number;
@@ -19,7 +19,7 @@ export abstract class BaseTransport<T extends BaseTransportOptions = BaseTranspo
 
   constructor(options: T, defaults: Required<T>, loggerName: string) {
     this.options = { ...defaults, ...options };
-    this.logger = new Logger(loggerName);
+    this.logger = createDefaultLogger(loggerName);
   }
 
   protected async createFastifyApp(): Promise<FastifyInstance> {

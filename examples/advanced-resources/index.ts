@@ -13,6 +13,8 @@ import {
   DynamicPrompt,
   PromptTemplate,
   StdioTransport,
+  ForgeServer,
+  createDefaultLogger,
 } from '../../src/index.js';
 
 /**
@@ -121,7 +123,7 @@ class AdvancedResourcesServer extends MCPServer {
         this.registerResource(uri, handler, `Log file: ${logFile}`, true);
       }
     } catch (error) {
-      console.error('Failed to initialize log resources:', error);
+      this.logger.error('Failed to initialize log resources:', error);
     }
   }
 
@@ -329,22 +331,21 @@ Focus on:
 
 // Start the server
 async function main() {
+  const logger = createDefaultLogger('AdvancedResourcesServer');
+  
+  logger.info('Starting Advanced Resources MCP Server...');
+
   const server = new AdvancedResourcesServer();
-  const transport = new StdioTransport();
-
-  console.error('Starting Advanced Resources MCP Server...');
-  console.error('Features:');
-  console.error('- Subscribable resources (memory://system/stats)');
-  console.error('- Resource templates (file:///{path}, config:///{name}.json)');
-  console.error('- Dynamic resource registration via @DynamicResource decorator');
-  console.error('- Dynamic prompt registration via @DynamicPrompt decorator');
-  console.error('- Prompt templates (debug/{language}/{issue}, optimize/{resource}/{metric})');
-  console.error('- List changed notifications');
-
-  await transport.start(server);
+  
+  await new ForgeServer(server)
+    .setTransport(new StdioTransport())
+    .setLogger(logger)
+    .setInstructions('Advanced Resources Server demonstrating subscribable resources, templates, and dynamic registration')
+    .start();
 }
 
 main().catch((error) => {
-  console.error('Failed to start server:', error);
+  const logger = createDefaultLogger('AdvancedResourcesServer');
+  logger.error('Failed to start server:', error);
   process.exit(1);
 });
