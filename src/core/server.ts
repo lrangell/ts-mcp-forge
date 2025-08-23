@@ -61,6 +61,7 @@ export abstract class MCPServer {
   private dynamicResourcesInitialized: boolean = false;
   private dynamicPromptsInitialized: boolean = false;
   protected logger: Logger;
+  private hasCustomLogger: boolean = false;
   private instructions?: string;
 
   constructor(
@@ -89,7 +90,12 @@ export abstract class MCPServer {
       throw new Error('Invalid logger: must implement debug, info, warn, and error methods');
     }
     this.logger = logger;
+    this.hasCustomLogger = true;
     return this;
+  }
+
+  getHasCustomLogger(): boolean {
+    return this.hasCustomLogger;
   }
 
   /**

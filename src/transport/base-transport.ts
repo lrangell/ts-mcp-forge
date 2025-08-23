@@ -22,19 +22,20 @@ export abstract class BaseTransport<T extends BaseTransportOptions = BaseTranspo
     this.logger = createDefaultLogger(loggerName);
   }
 
-  protected async createFastifyApp(): Promise<FastifyInstance> {
+  protected async createFastifyApp(server: MCPServer): Promise<FastifyInstance> {
+    const hasCustomLogger = server.getHasCustomLogger();
     const logLevel = this.options.logLevel || process.env.LOG_LEVEL || 'silent';
 
     const app = Fastify({
       logger:
-        logLevel !== 'silent'
-          ? {
+        hasCustomLogger || logLevel === 'silent'
+          ? false
+          : {
               level: logLevel,
               transport: {
                 target: '@fastify/one-line-logger',
               },
-            }
-          : false,
+            },
     });
 
     if (this.options.cors) {
@@ -60,7 +61,7 @@ export abstract class BaseTransport<T extends BaseTransportOptions = BaseTranspo
   }
 
   private async startInternal(server: MCPServer): Promise<void> {
-    this.app = await this.createFastifyApp();
+    this.app = await this.createFastifyApp(server);
     await this.setupRoutes(this.app, server);
 
     await this.app.listen({
