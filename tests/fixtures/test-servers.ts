@@ -4,7 +4,7 @@
 
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../src/core/server.js';
-import { ResourceErrors, PromptErrors, ToolErrors } from '../../src/core/mcp-errors.js';
+import { ResourceErrors } from '../../src/core/mcp-errors.js';
 import {
   Tool,
   Resource,
@@ -86,13 +86,15 @@ export class ComprehensiveTestServer extends MCPServer {
     @Param('Width') width: number = 100,
     @Param('Height') height: number = 100
   ): Promise<Result<{ image: string; mimeType: string }, string>> {
-    // Generate a simple base64 encoded test image
     const testImageData =
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+    const dimensions = `${width}x${height}`;
 
     return ok({
       image: testImageData,
       mimeType: type === 'png' ? 'image/png' : 'image/jpeg',
+      dimensions,
     });
   }
 

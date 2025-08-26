@@ -53,7 +53,13 @@ class TestToolsServer extends MCPServer {
     if (!to || !subject || !body) {
       return err('to, subject, and body are required');
     }
-    return ok({ messageId: `msg-${Date.now()}` });
+    const ccCount = cc?.length || 0;
+    const bccCount = bcc?.length || 0;
+    return ok({
+      messageId: `msg-${Date.now()}`,
+      ccCount,
+      bccCount,
+    });
   }
 
   @Tool('image-analyze', 'Analyze image content')

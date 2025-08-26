@@ -2,9 +2,9 @@
  * Utility functions for MCP testing
  */
 
-import { describe, it, expect } from 'vitest';
+import { expect } from 'vitest';
 import { Result } from 'neverthrow';
-import { McpError, ErrorCode, RESOURCE_NOT_FOUND_CODE } from '../../src/index.js';
+import { McpError } from '../../src/index.js';
 
 /**
  * Test utilities for common testing patterns

@@ -13,18 +13,12 @@ interface Config {
 // Math toolkit - always loaded
 class MathToolkit extends Toolkit {
   @Tool('Add numbers')
-  add(
-    @Param('First') a: number,
-    @Param('Second') b: number
-  ): Result<number, string> {
+  add(@Param('First') a: number, @Param('Second') b: number): Result<number, string> {
     return ok(a + b);
   }
-  
+
   @Tool('Subtract numbers')
-  subtract(
-    @Param('First') a: number,
-    @Param('Second') b: number
-  ): Result<number, string> {
+  subtract(@Param('First') a: number, @Param('Second') b: number): Result<number, string> {
     return ok(a - b);
   }
 }
@@ -35,7 +29,7 @@ class StringToolkit extends Toolkit {
   reverse(@Param('Text') text: string): Result<string, string> {
     return ok(text.split('').reverse().join(''));
   }
-  
+
   @Tool('Uppercase string')
   uppercase(@Param('Text') text: string): Result<string, string> {
     return ok(text.toUpperCase());
@@ -44,18 +38,18 @@ class StringToolkit extends Toolkit {
 
 class DynamicToolkitServer extends MCPServer {
   private config: Config;
-  
+
   constructor(config: Config) {
     super('Dynamic Toolkit Server', '1.0.0');
     this.config = config;
-    
+
     this.loadToolkits();
   }
 
   private loadToolkits(): void {
     // Always add math toolkit
     this.addToolkit(new MathToolkit(), 'math');
-    
+
     // Conditionally add string toolkit
     if (this.config.enableString) {
       this.addToolkit(new StringToolkit(), 'str');
@@ -74,14 +68,15 @@ class DynamicToolkitServer extends MCPServer {
 }
 
 const config: Config = {
-  enableString: false
+  enableString: false,
 };
 
 const server = new DynamicToolkitServer(config);
 
 new ForgeServer(server)
   .setTransport(new StdioTransport())
-  .setInstructions(`
+  .setInstructions(
+    `
     This server demonstrates dynamic toolkit loading.
     
     Initially available:
@@ -92,7 +87,8 @@ new ForgeServer(server)
     After enabling string toolkit:
     - str:reverse - Reverse a string
     - str:uppercase - Convert to uppercase
-  `)
+  `
+  )
   .start()
   .catch((error) => {
     console.error('Failed to start server:', error);

@@ -4,10 +4,7 @@ import { Tool, Param } from '../../src/decorators/index.js';
 
 export class MathToolkit extends Toolkit {
   @Tool('Add two numbers together')
-  add(
-    @Param('First number') a: number,
-    @Param('Second number') b: number
-  ): Result<number, string> {
+  add(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
     return ok(a + b);
   }
 
@@ -32,9 +29,7 @@ export class MathToolkit extends Toolkit {
     @Param('Dividend') dividend: number,
     @Param('Divisor') divisor: number
   ): Result<number, string> {
-    return divisor === 0 
-      ? err('Cannot divide by zero')
-      : ok(dividend / divisor);
+    return divisor === 0 ? err('Cannot divide by zero') : ok(dividend / divisor);
   }
 
   @Tool('Calculate the power of a number')
@@ -47,16 +42,14 @@ export class MathToolkit extends Toolkit {
 
   @Tool('Calculate the square root of a number')
   sqrt(@Param('Number') n: number): Result<number, string> {
-    return n < 0
-      ? err('Cannot calculate square root of negative number')
-      : ok(Math.sqrt(n));
+    return n < 0 ? err('Cannot calculate square root of negative number') : ok(Math.sqrt(n));
   }
 
   @Tool('Calculate factorial of a number')
   factorial(@Param('Number') n: number): Result<number, string> {
     if (n < 0) return err('Factorial not defined for negative numbers');
     if (n === 0 || n === 1) return ok(1);
-    
+
     let result = 1;
     for (let i = 2; i <= n; i++) {
       result *= i;
@@ -79,28 +72,17 @@ export class MathToolkit extends Toolkit {
   }
 
   @Tool('Get the maximum of two numbers')
-  max(
-    @Param('First number') a: number,
-    @Param('Second number') b: number
-  ): Result<number, string> {
+  max(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
     return ok(Math.max(a, b));
   }
 
   @Tool('Get the minimum of two numbers')
-  min(
-    @Param('First number') a: number,
-    @Param('Second number') b: number
-  ): Result<number, string> {
+  min(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
     return ok(Math.min(a, b));
   }
 
   @Tool('Calculate the modulo (remainder) of division')
-  modulo(
-    @Param('Dividend') a: number,
-    @Param('Divisor') b: number
-  ): Result<number, string> {
-    return b === 0
-      ? err('Cannot calculate modulo with divisor zero')
-      : ok(a % b);
+  modulo(@Param('Dividend') a: number, @Param('Divisor') b: number): Result<number, string> {
+    return b === 0 ? err('Cannot calculate modulo with divisor zero') : ok(a % b);
   }
 }

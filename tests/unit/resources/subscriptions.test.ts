@@ -4,16 +4,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ComprehensiveTestServer, MinimalTestServer } from '../../fixtures/test-servers.js';
-import { createTestClient, InMemoryTransport } from '../../helpers/test-client.js';
+import { ComprehensiveTestServer } from '../../fixtures/test-servers.js';
+import { createTestClient } from '../../helpers/test-client.js';
 import { setupMCPAssertions } from '../../helpers/assertions.js';
 import { ResultTestUtils, TestUtils } from '../../helpers/test-utilities.js';
-import {
-  validResourceSubscribeRequest,
-  validResourceUnsubscribeRequest,
-  validResourceUpdatedNotification,
-  validResourceListChangedNotification,
-} from '../../fixtures/mcp-protocol.js';
+import {} from '../../fixtures/mcp-protocol.js';
 import { ErrorCode, RESOURCE_NOT_FOUND_CODE } from '../../../src/index.js';
 import { Notification } from '../../../src/core/protocol.js';
 
@@ -286,6 +281,7 @@ describe('Resource Subscriptions', () => {
       // Initially not subscribed - try to unsubscribe
       const unsubResult1 = await client.unsubscribeFromResource(uri);
       // Should either succeed (idempotent) or indicate not subscribed
+      expect(unsubResult1.isOk()).toBe(true);
 
       // Subscribe
       const subResult = await client.subscribeToResource(uri);
@@ -325,6 +321,7 @@ describe('Resource Subscriptions', () => {
       for (const uri of uris) {
         const result = await client.unsubscribeFromResource(uri);
         // Should succeed or be idempotent
+        expect(result.isOk()).toBe(true);
       }
     });
   });

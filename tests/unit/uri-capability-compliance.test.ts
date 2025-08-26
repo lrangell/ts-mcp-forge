@@ -338,11 +338,9 @@ class EmptyServer extends MCPServer {
 
 describe('URI Validation Compliance', () => {
   let server: URICapabilityComplianceServer;
-  let router: ReturnType<typeof createMCPRouter>;
 
   beforeEach(() => {
     server = new URICapabilityComplianceServer();
-    router = createMCPRouter(server);
   });
 
   describe('Standard URI Schemes', () => {

@@ -111,59 +111,59 @@ export abstract class MCPServer {
 
   addToolkit(toolkit: Toolkit, namespace?: string): this {
     const toolkitConstructor = toolkit.constructor;
-    
-    const applyNamespace = (key: string): string =>
-      namespace ? `${namespace}:${key}` : key;
-    
+
+    const applyNamespace = (key: string): string => (namespace ? `${namespace}:${key}` : key);
+
     // Configuration for each metadata type
     const metadataConfigs = [
-      { 
+      {
         getter: getAllToolsMetadata,
         nameField: 'name',
         targetMap: this.tools,
-        fallbackField: 'method'
+        fallbackField: 'method',
       },
-      { 
+      {
         getter: getAllResourcesMetadata,
         nameField: 'uri',
-        targetMap: this.resources
+        targetMap: this.resources,
       },
-      { 
+      {
         getter: getAllResourceTemplatesMetadata,
         nameField: 'uriTemplate',
-        targetMap: this.resourceTemplates
+        targetMap: this.resourceTemplates,
       },
-      { 
+      {
         getter: getAllPromptsMetadata,
         nameField: 'name',
         targetMap: this.prompts,
-        fallbackField: 'method'
+        fallbackField: 'method',
       },
-      { 
+      {
         getter: getAllPromptTemplatesMetadata,
         nameField: 'nameTemplate',
-        targetMap: this.promptTemplates
-      }
+        targetMap: this.promptTemplates,
+      },
     ];
-    
+
     // Process each metadata type with the same pattern
-    metadataConfigs.forEach(config => {
+    metadataConfigs.forEach((config) => {
       const transformed = mapValues(
         Object.fromEntries(config.getter(toolkitConstructor)),
         (meta: any) => ({
           ...meta,
           [config.nameField]: applyNamespace(
-            meta[config.nameField] || (config.fallbackField ? meta[config.fallbackField] : meta[config.nameField])
+            meta[config.nameField] ||
+              (config.fallbackField ? meta[config.fallbackField] : meta[config.nameField])
           ),
-          instance: toolkit
+          instance: toolkit,
         })
       );
-      
+
       forEachObj(transformed, (value, key) => {
         config.targetMap.set(applyNamespace(key), value);
       });
     });
-    
+
     return this;
   }
 
@@ -795,7 +795,10 @@ export abstract class MCPServer {
           {} as Record<string, unknown>
         );
 
-        return MethodInvoker.invokeMethod(target, template.method, [extractedParams, additionalArgs]);
+        return MethodInvoker.invokeMethod(target, template.method, [
+          extractedParams,
+          additionalArgs,
+        ]);
       } else {
         // Method only accepts template parameters, combine all arguments
         const combinedArgs = { ...extractedParams, ...(args as object) };

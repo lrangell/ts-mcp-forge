@@ -9,10 +9,7 @@ import { Toolkit } from '../../src/core/toolkit.js';
 // Math toolkit with 2 tools
 class MathToolkit extends Toolkit {
   @Tool('Add two numbers')
-  add(
-    @Param('First number') a: number,
-    @Param('Second number') b: number
-  ): Result<number, string> {
+  add(@Param('First number') a: number, @Param('Second number') b: number): Result<number, string> {
     return ok(a + b);
   }
 
@@ -44,7 +41,7 @@ class StringToolkit extends Toolkit {
 class ToolkitExampleServer extends MCPServer {
   constructor() {
     super('Toolkit Example Server', '1.0.0');
-    
+
     // Add multiple toolkits with different namespaces
     this.addToolkit(new MathToolkit(), 'math');
     this.addToolkit(new StringToolkit(), 'str');
@@ -55,7 +52,8 @@ const server = new ToolkitExampleServer();
 
 new ForgeServer(server)
   .setTransport(new StdioTransport())
-  .setInstructions(`
+  .setInstructions(
+    `
     This server demonstrates the toolkit system with namespaced tools.
     
     Math tools (prefixed with 'math:'):
@@ -65,7 +63,8 @@ new ForgeServer(server)
     String tools (prefixed with 'str:'):
     - str:concat - Concatenate strings
     - str:reverse - Reverse a string
-  `)
+  `
+  )
   .start()
   .catch((error) => {
     console.error('Failed to start server:', error);

@@ -28,9 +28,7 @@ export class StringToolkit extends Toolkit {
 
   @Tool('Capitalize first letter of string')
   capitalize(@Param('Input string') str: string): Result<string, string> {
-    return str.length === 0
-      ? ok('')
-      : ok(str.charAt(0).toUpperCase() + str.slice(1).toLowerCase());
+    return str.length === 0 ? ok('') : ok(str.charAt(0).toUpperCase() + str.slice(1).toLowerCase());
   }
 
   @Tool('Trim whitespace from string')
@@ -45,7 +43,10 @@ export class StringToolkit extends Toolkit {
 
   @Tool('Count words in text')
   wordCount(@Param('Text to analyze') text: string): Result<number, string> {
-    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const words = text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
     return ok(words.length);
   }
 
@@ -114,17 +115,15 @@ export class StringToolkit extends Toolkit {
     @Param('String to repeat') str: string,
     @Param('Number of times') times: number
   ): Result<string, string> {
-    return times < 0
-      ? err('Cannot repeat negative times')
-      : ok(str.repeat(times));
+    return times < 0 ? err('Cannot repeat negative times') : ok(str.repeat(times));
   }
 
   @Tool('Convert string to camelCase')
   toCamelCase(@Param('Input string') str: string): Result<string, string> {
     const words = str.split(/[\s_-]+/);
     const camelCase = words
-      .map((word, index) => 
-        index === 0 
+      .map((word, index) =>
+        index === 0
           ? word.toLowerCase()
           : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
       )

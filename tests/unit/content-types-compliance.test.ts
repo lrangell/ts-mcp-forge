@@ -363,11 +363,8 @@ function hello() {
 
 describe('Content Types Compliance', () => {
   let server: ContentTypesComplianceServer;
-  let router: ReturnType<typeof createMCPRouter>;
-
   beforeEach(() => {
     server = new ContentTypesComplianceServer();
-    router = createMCPRouter(server);
   });
 
   describe('Text Content Type Compliance', () => {

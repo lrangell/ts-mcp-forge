@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../../src/core/server.js';
-import { PromptTemplate, Param } from '../../../src/decorators/index.js';
+import { PromptTemplate } from '../../../src/decorators/index.js';
 import { createMCPRouter } from '../../../src/core/router.js';
 import { ErrorCode } from '../../../src/index.js';
 
