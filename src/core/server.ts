@@ -1,5 +1,5 @@
 import { Result, ok, err } from 'neverthrow';
-import { map, find } from 'remeda';
+import { map, find, mapValues, forEachObj } from 'remeda';
 import { match } from 'ts-pattern';
 import UriTemplate from 'uri-template-lite';
 import {
@@ -41,6 +41,7 @@ import { wrapSync } from '../utils/error-handling.js';
 import { MethodInvoker } from '../utils/method-invoker.js';
 import { resolveMimeType } from '../utils/mime-type.js';
 import { Logger, createDefaultLogger, isValidLogger } from './logger.js';
+import { Toolkit } from './toolkit.js';
 
 // ErrorMessages removed - using domain-specific error builders from mcp-errors.ts
 
@@ -105,6 +106,64 @@ export abstract class MCPServer {
    */
   setInstructions(instructions: string): this {
     this.instructions = instructions;
+    return this;
+  }
+
+  addToolkit(toolkit: Toolkit, namespace?: string): this {
+    const toolkitConstructor = toolkit.constructor;
+    
+    const applyNamespace = (key: string): string =>
+      namespace ? `${namespace}:${key}` : key;
+    
+    // Configuration for each metadata type
+    const metadataConfigs = [
+      { 
+        getter: getAllToolsMetadata,
+        nameField: 'name',
+        targetMap: this.tools,
+        fallbackField: 'method'
+      },
+      { 
+        getter: getAllResourcesMetadata,
+        nameField: 'uri',
+        targetMap: this.resources
+      },
+      { 
+        getter: getAllResourceTemplatesMetadata,
+        nameField: 'uriTemplate',
+        targetMap: this.resourceTemplates
+      },
+      { 
+        getter: getAllPromptsMetadata,
+        nameField: 'name',
+        targetMap: this.prompts,
+        fallbackField: 'method'
+      },
+      { 
+        getter: getAllPromptTemplatesMetadata,
+        nameField: 'nameTemplate',
+        targetMap: this.promptTemplates
+      }
+    ];
+    
+    // Process each metadata type with the same pattern
+    metadataConfigs.forEach(config => {
+      const transformed = mapValues(
+        Object.fromEntries(config.getter(toolkitConstructor)),
+        (meta: any) => ({
+          ...meta,
+          [config.nameField]: applyNamespace(
+            meta[config.nameField] || (config.fallbackField ? meta[config.fallbackField] : meta[config.nameField])
+          ),
+          instance: toolkit
+        })
+      );
+      
+      forEachObj(transformed, (value, key) => {
+        config.targetMap.set(applyNamespace(key), value);
+      });
+    });
+    
     return this;
   }
 
@@ -271,7 +330,8 @@ export abstract class MCPServer {
     const argsObject = args as Record<string, unknown> | undefined;
     const argsArray = MethodInvoker.prepareArguments(toolMeta.params, argsObject);
 
-    return MethodInvoker.invokeMethod(this, toolMeta.method, argsArray).then((result) =>
+    const target = toolMeta.instance || this;
+    return MethodInvoker.invokeMethod(target, toolMeta.method, argsArray).then((result) =>
       result.map((value) => MethodInvoker.createToolResponse(value)).mapErr((error) => error)
     );
   }
@@ -301,7 +361,8 @@ export abstract class MCPServer {
       return err(ResourceErrors.notFound(uri));
     }
 
-    return MethodInvoker.invokeMethod(this, resourceMeta.method, []).then((result) =>
+    const target = resourceMeta.instance || this;
+    return MethodInvoker.invokeMethod(target, resourceMeta.method, []).then((result) =>
       result.map((value) =>
         MethodInvoker.createResourceResponse(
           uri,
@@ -345,7 +406,8 @@ export abstract class MCPServer {
     const argsObject = args as Record<string, unknown> | undefined;
     const argsArray = MethodInvoker.prepareArguments(promptMeta.params, argsObject);
 
-    return MethodInvoker.invokeMethod(this, promptMeta.method, argsArray);
+    const target = promptMeta.instance || this;
+    return MethodInvoker.invokeMethod(target, promptMeta.method, argsArray);
   }
 
   async subscribeToResource(clientId: string, uri: string): Promise<Result<void, McpError>> {
@@ -496,7 +558,8 @@ export abstract class MCPServer {
         return err(ResourceErrors.templateMatchFailed(template.uriTemplate, uri));
       }
 
-      return MethodInvoker.invokeMethod(this, template.method, [params]).then(
+      const target = template.instance || this;
+      return MethodInvoker.invokeMethod(target, template.method, [params]).then(
         (result) =>
           result.map((value) =>
             MethodInvoker.createResourceResponse(
@@ -715,7 +778,8 @@ export abstract class MCPServer {
       const templateParams = Object.keys(extractedParams);
 
       // Check if method expects a second parameter for additional arguments
-      const method = (this as Record<string, unknown>)[template.method] as Function;
+      const target = template.instance || this;
+      const method = (target as Record<string, unknown>)[template.method] as Function;
       const methodLength = method.length;
 
       if (methodLength >= 2 && args && Object.keys(args as object).length > 0) {
@@ -731,11 +795,11 @@ export abstract class MCPServer {
           {} as Record<string, unknown>
         );
 
-        return MethodInvoker.invokeMethod(this, template.method, [extractedParams, additionalArgs]);
+        return MethodInvoker.invokeMethod(target, template.method, [extractedParams, additionalArgs]);
       } else {
         // Method only accepts template parameters, combine all arguments
         const combinedArgs = { ...extractedParams, ...(args as object) };
-        return MethodInvoker.invokeMethod(this, template.method, [combinedArgs]);
+        return MethodInvoker.invokeMethod(target, template.method, [combinedArgs]);
       }
     } catch (error) {
       return err(PromptErrors.internalError(`Failed to parse template: ${error}`));

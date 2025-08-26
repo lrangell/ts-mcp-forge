@@ -25,6 +25,7 @@ export interface ToolMetadata {
   paramTypes?: unknown[];
   returnType?: unknown;
   params?: ParamMetadata[];
+  instance?: unknown;
 }
 
 export interface ResourceMetadata {
@@ -33,6 +34,7 @@ export interface ResourceMetadata {
   method: string;
   subscribable?: boolean;
   mimeType?: string;
+  instance?: unknown;
 }
 
 export interface ResourceTemplateMetadata {
@@ -41,6 +43,7 @@ export interface ResourceTemplateMetadata {
   description?: string;
   mimeType?: string;
   method: string;
+  instance?: unknown;
 }
 
 export interface PromptMetadata {
@@ -48,6 +51,7 @@ export interface PromptMetadata {
   description: string;
   method: string;
   params?: ParamMetadata[];
+  instance?: unknown;
 }
 
 export interface DynamicResourceMetadata {
@@ -64,6 +68,7 @@ export interface PromptTemplateMetadata {
   nameTemplate: string;
   description?: string;
   method: string;
+  instance?: unknown;
 }
 
 export const setToolMetadata = (
