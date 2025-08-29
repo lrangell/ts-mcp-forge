@@ -13,7 +13,7 @@ const PROMPT_TEMPLATE_METADATA = Symbol('promptTemplate');
 export interface ParamMetadata {
   index: number;
   name: string;
-  description: string;
+  description?: string;
   type?: unknown;
   required?: boolean;
 }

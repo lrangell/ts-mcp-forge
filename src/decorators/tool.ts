@@ -1,5 +1,9 @@
 import 'reflect-metadata';
 import { setToolMetadata, getParamMetadata } from './metadata.js';
+import {
+  extractParametersFromFunction,
+  mergeParameterMetadata,
+} from '../utils/parameter-parser.js';
 
 export function Tool(description: string): MethodDecorator;
 export function Tool(name: string, description: string): MethodDecorator;
@@ -14,7 +18,10 @@ export function Tool(nameOrDescription: string, description?: string): MethodDec
     const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
     const returnType = Reflect.getMetadata('design:returntype', target, propertyKey);
 
-    const params = getParamMetadata(target, methodName) || [];
+    const method = descriptor.value;
+    const parsedParams = extractParametersFromFunction(method);
+    const existingParams = getParamMetadata(target, methodName);
+    const params = mergeParameterMetadata(parsedParams, paramTypes, existingParams);
 
     setToolMetadata(target, methodName, {
       name: toolName,

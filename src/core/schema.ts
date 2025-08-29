@@ -70,10 +70,13 @@ export const generateParamsSchema = (params: ParamMetadata[] = []) => {
 
     const { $schema: _$schema, ...schemaWithoutMeta } = jsonSchema as Record<string, unknown>;
 
-    properties[param.name] = {
-      ...schemaWithoutMeta,
-      description: param.description,
-    };
+    const property: Record<string, unknown> = { ...schemaWithoutMeta };
+
+    if (param.description) {
+      property.description = param.description;
+    }
+
+    properties[param.name] = property;
 
     if (param.required !== false) {
       required.push(param.name);
@@ -109,11 +112,13 @@ export const generatePromptSchema = (
   return {
     name,
     description,
-    arguments: sortedParams.map((param) => ({
-      name: param.name,
-      description: param.description,
-      required: true, // Could be enhanced
-    })),
+    arguments: sortedParams
+      .filter((param) => param.description)
+      .map((param) => ({
+        name: param.name,
+        description: param.description!,
+        required: param.required !== false,
+      })),
   };
 };
 
