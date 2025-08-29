@@ -211,7 +211,7 @@ export class ComprehensiveTestServer extends MCPServer {
   @Prompt('code_review', 'Code review assistant')
   async codeReviewPrompt(
     @Param('Programming language') language: string,
-    @Param('Code focus area', { required: false }) focus?: string
+    @Param('Code focus area', false) focus?: string
   ): Promise<Result<object, string>> {
     const focusText = focus ? ` with a focus on ${focus}` : '';
 
@@ -232,7 +232,7 @@ export class ComprehensiveTestServer extends MCPServer {
   @Prompt('summarize', 'Text summarization assistant')
   async summarizePrompt(
     @Param('Text to summarize') text: string,
-    @Param('Summary length', { required: false }) length: 'short' | 'medium' | 'long' = 'medium'
+    @Param('Summary length', false) length: 'short' | 'medium' | 'long' = 'medium'
   ): Promise<Result<object, string>> {
     const lengthInstructions = {
       short: 'in 1-2 sentences',

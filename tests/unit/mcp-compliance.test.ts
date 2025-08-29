@@ -126,7 +126,7 @@ class MCPComplianceTestServer extends MCPServer {
   codeReviewPrompt(
     @Param('Programming language') language: string,
     @Param('Code snippet') code: string,
-    @Param('Focus area', { required: false }) focus?: string
+    @Param('Focus area', false) focus?: string
   ): Result<object, string> {
     if (!language || !code) {
       return err('Language and code are required');
@@ -178,7 +178,7 @@ class MCPComplianceTestServer extends MCPServer {
   @Prompt('multi-modal', 'Multi-modal prompt with various content types')
   multiModalPrompt(
     @Param('Task description') task: string,
-    @Param('Include image', { required: false }) includeImage?: boolean
+    @Param('Include image', false) includeImage?: boolean
   ): Result<object, string> {
     const messages = [
       {

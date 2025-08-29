@@ -29,7 +29,7 @@ class TestToolsServer extends MCPServer {
   @Tool('get-weather', 'Get weather information for a location')
   async getWeather(
     @Param('Location to get weather for') location: string,
-    @Param('Temperature unit (celsius or fahrenheit)', { required: false }) unit?: string
+    @Param('Temperature unit (celsius or fahrenheit)', false) unit?: string
   ): Promise<Result<object, string>> {
     if (!location) {
       return err('Location is required');
@@ -47,8 +47,8 @@ class TestToolsServer extends MCPServer {
     @Param('Recipient email address') to: string,
     @Param('Email subject') subject: string,
     @Param('Email body content') body: string,
-    @Param('CC recipients', { required: false }) cc?: string[],
-    @Param('BCC recipients', { required: false }) bcc?: string[]
+    @Param('CC recipients', false) cc?: string[],
+    @Param('BCC recipients', false) bcc?: string[]
   ): Promise<Result<{ messageId: string }, string>> {
     if (!to || !subject || !body) {
       return err('to, subject, and body are required');
@@ -180,7 +180,7 @@ describe('Tools List (tools/list)', () => {
         }
 
         // All properties should have types
-        for (const [propName, propSchema] of Object.entries(tool.inputSchema.properties)) {
+        for (const [_propName, propSchema] of Object.entries(tool.inputSchema.properties)) {
           expect(propSchema).toHaveProperty('type');
           expect(typeof propSchema.type).toBe('string');
         }

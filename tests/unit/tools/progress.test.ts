@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../../src/core/server.js';
 import { Tool, Param } from '../../../src/decorators/index.js';
-import { NotificationSender, NotificationManager } from '../../../src/core/notifications.js';
+import { NotificationSender } from '../../../src/core/notifications.js';
 import { Notification } from '../../../src/core/protocol.js';
 
 // Mock notification sender to capture progress notifications
@@ -73,8 +73,8 @@ class ProgressTestServer extends MCPServer {
   @Tool('long-running-task', 'Simulate a long-running task with progress updates')
   async longRunningTask(
     @Param('Number of steps to process') steps: number,
-    @Param('Delay between steps in milliseconds', { required: false }) delay?: number,
-    @Param('Progress token for tracking', { required: false }) progressToken?: string
+    @Param('Delay between steps in milliseconds', false) delay?: number,
+    @Param('Progress token for tracking', false) progressToken?: string
   ): Promise<Result<object, string>> {
     if (typeof steps !== 'number' || steps <= 0) {
       return err('Steps must be a positive number');
@@ -117,7 +117,7 @@ class ProgressTestServer extends MCPServer {
   async fileBatchProcessor(
     @Param('Array of file paths to process') filePaths: string[],
     @Param('Processing operation (read, validate, compress)') operation: string,
-    @Param('Progress token for tracking', { required: false }) progressToken?: string
+    @Param('Progress token for tracking', false) progressToken?: string
   ): Promise<Result<object, string>> {
     if (!Array.isArray(filePaths) || filePaths.length === 0) {
       return err('File paths array is required and cannot be empty');
@@ -186,8 +186,8 @@ class ProgressTestServer extends MCPServer {
   @Tool('download-simulator', 'Simulate file download with progress updates')
   async downloadSimulator(
     @Param('File URL to download') url: string,
-    @Param('File size in bytes', { required: false }) fileSize?: number,
-    @Param('Progress token for tracking', { required: false }) progressToken?: string
+    @Param('File size in bytes', false) fileSize?: number,
+    @Param('Progress token for tracking', false) progressToken?: string
   ): Promise<Result<object, string>> {
     if (!url) {
       return err('URL is required');
@@ -244,7 +244,7 @@ class ProgressTestServer extends MCPServer {
   @Tool('failing-progress-task', 'Task that fails during progress updates')
   async failingProgressTask(
     @Param('Number of steps before failure') stepsBeforeFailure: number,
-    @Param('Progress token for tracking', { required: false }) progressToken?: string
+    @Param('Progress token for tracking', false) progressToken?: string
   ): Promise<Result<object, string>> {
     const token = progressToken || `failing-${Date.now()}`;
     const totalSteps = stepsBeforeFailure + 5;

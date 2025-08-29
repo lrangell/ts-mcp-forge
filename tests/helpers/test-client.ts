@@ -5,7 +5,6 @@
 import { Result, ok, err } from 'neverthrow';
 import {
   Request,
-  Response,
   Notification,
   InitializeRequest,
   InitializeResponse,

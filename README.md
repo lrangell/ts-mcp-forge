@@ -197,6 +197,10 @@ const transport = new HTTPTransport({
 await transport.start(server);
 ```
 
+## Limitations
+
+- **Minification**: Parameter names are extracted from runtime function strings, so minified code will use minified parameter names (e.g., `a`, `b`) unless explicit names are provided via `@Param`. Tool names derived from method names will also be minified unless explicitly specified in `@Tool('name', 'description')`.
+
 ## API Reference
 
 ### Decorators

@@ -1,15 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Result, ok, err } from 'neverthrow';
+import { Result, ok } from 'neverthrow';
 import { MCPServer } from '../../../src/core/server.js';
 import { createMCPRouter } from '../../../src/core/router.js';
-import {
-  Resource,
-  ResourceTemplate,
-  Prompt,
-  Param,
-  DynamicResource,
-  DynamicPrompt,
-} from '../../../src/decorators/index.js';
+import { Resource, Prompt, Param, DynamicResource } from '../../../src/decorators/index.js';
 import { CompletionResponse } from '../../../src/core/protocol.js';
 
 class PaginationTestServer extends MCPServer {
@@ -452,7 +445,7 @@ class PaginationTestServer extends MCPServer {
     return scored
       .sort((a, b) => b.score - a.score)
       .slice(0, 100)
-      .map(({ score, ...item }) => item);
+      .map(({ _score, ...item }) => item);
   }
 
   private calculateRelevanceScore(text: string, query: string): number {

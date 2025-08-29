@@ -4,16 +4,16 @@
 
 ### Features
 
-* add toolkit system for organizing tools into reusable classes ([8a7d661](https://github.com/lrangell/ts-mcp-forge/commit/8a7d6613ac62130f1a6fcd8fdfd6ae473fcf4613))
-* disable pino when custom logger is provided ([8b1b7eb](https://github.com/lrangell/ts-mcp-forge/commit/8b1b7eb3ab888f61a4ba6a10fda0badd1088d508))
+- add toolkit system for organizing tools into reusable classes ([8a7d661](https://github.com/lrangell/ts-mcp-forge/commit/8a7d6613ac62130f1a6fcd8fdfd6ae473fcf4613))
+- disable pino when custom logger is provided ([8b1b7eb](https://github.com/lrangell/ts-mcp-forge/commit/8b1b7eb3ab888f61a4ba6a10fda0badd1088d508))
 
 ### Maintenance
 
-* linting and formatting ([91bd95f](https://github.com/lrangell/ts-mcp-forge/commit/91bd95f65a1c4f59a4a9b338eb0508d053afeaca))
+- linting and formatting ([91bd95f](https://github.com/lrangell/ts-mcp-forge/commit/91bd95f65a1c4f59a4a9b338eb0508d053afeaca))
 
 ### Documentation
 
-* add toolkit examples demonstrating namespace usage ([bac090e](https://github.com/lrangell/ts-mcp-forge/commit/bac090ebf7ec48d6202db7b416f81d23a2a40319))
+- add toolkit examples demonstrating namespace usage ([bac090e](https://github.com/lrangell/ts-mcp-forge/commit/bac090ebf7ec48d6202db7b416f81d23a2a40319))
 
 ## [0.7.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.5.1...v0.7.0) (2025-08-18)
 

@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../src/core/server.js';
 import { Tool, Resource, Prompt, Param } from '../../src/decorators/index.js';
-import { createMCPRouter } from '../../src/core/router.js';
 import { setupMCPAssertions, AssertionHelpers } from '../helpers/assertions.js';
 
 // Setup custom assertions

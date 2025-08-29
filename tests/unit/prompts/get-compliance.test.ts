@@ -76,8 +76,8 @@ class PromptsGetComplianceServer extends MCPServer {
   @Prompt('multi-modal', 'Multi-modal prompt with different content types')
   multiModalPrompt(
     @Param('Text content') textContent: string,
-    @Param('Include image', { required: false }) includeImage?: boolean,
-    @Param('Include resource', { required: false }) includeResource?: boolean
+    @Param('Include image', false) includeImage?: boolean,
+    @Param('Include resource', false) includeResource?: boolean
   ): Result<object, string> {
     if (!textContent) {
       return err('Text content is required');
@@ -121,8 +121,8 @@ class PromptsGetComplianceServer extends MCPServer {
   codeAssistantPrompt(
     @Param('Programming language') language: string,
     @Param('Task type') taskType: string,
-    @Param('Code context', { required: false }) codeContext?: string,
-    @Param('Requirements', { required: false }) requirements?: string[]
+    @Param('Code context', false) codeContext?: string,
+    @Param('Requirements', false) requirements?: string[]
   ): Result<object, string> {
     if (!language || !taskType) {
       return err('Language and task type are required');
@@ -174,7 +174,7 @@ class PromptsGetComplianceServer extends MCPServer {
   dataAnalysisPrompt(
     @Param('Dataset description') datasetDescription: string,
     @Param('Analysis goals') analysisGoals: string[],
-    @Param('Data sample', { required: false }) dataSample?: object
+    @Param('Data sample', false) dataSample?: object
   ): Result<object, string> {
     if (!datasetDescription || !analysisGoals || analysisGoals.length === 0) {
       return err('Dataset description and analysis goals are required');
@@ -224,7 +224,7 @@ class PromptsGetComplianceServer extends MCPServer {
     @Param('Source language') sourceLang: string,
     @Param('Target language') targetLang: string,
     @Param('Text to translate') text: string,
-    @Param('Translation style', { required: false }) style?: string
+    @Param('Translation style', false) style?: string
   ): Result<object, string> {
     if (!sourceLang || !targetLang || !text) {
       return err('Source language, target language, and text are required');
@@ -257,8 +257,8 @@ class PromptsGetComplianceServer extends MCPServer {
     @Param('Genre') genre: string,
     @Param('Theme') theme: string,
     @Param('Length') length: string,
-    @Param('Character details', { required: false }) characterDetails?: object,
-    @Param('Setting', { required: false }) setting?: string
+    @Param('Character details', false) characterDetails?: object,
+    @Param('Setting', false) setting?: string
   ): Result<object, string> {
     if (!genre || !theme || !length) {
       return err('Genre, theme, and length are required');

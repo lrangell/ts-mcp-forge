@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Result, ok, err } from 'neverthrow';
 import { MCPServer } from '../../../src/core/server.js';
 import { Tool, Param } from '../../../src/decorators/index.js';
-import { McpError, ErrorCode } from '../../../src/index.js';
+import { ErrorCode } from '../../../src/index.js';
 
 // Test server class for error handling testing
 class ErrorTestServer extends MCPServer {
@@ -117,7 +117,7 @@ class ErrorTestServer extends MCPServer {
   @Tool('complex-validation', 'Tool with complex parameter validation')
   complexValidation(
     @Param('User object with name and age') user: { name: string; age: number },
-    @Param('Settings array', { required: false }) settings?: string[]
+    @Param('Settings array', false) settings?: string[]
   ): Result<object, string> {
     if (!user || typeof user !== 'object') {
       return err('User parameter must be an object');

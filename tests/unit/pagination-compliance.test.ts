@@ -4,16 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Result, ok, err } from 'neverthrow';
+import { Result, ok } from 'neverthrow';
 import { MCPServer } from '../../src/core/server.js';
-import {
-  Tool,
-  Resource,
-  Prompt,
-  Param,
-  DynamicResource,
-  DynamicPrompt,
-} from '../../src/decorators/index.js';
+import { Tool, Param, DynamicResource, DynamicPrompt } from '../../src/decorators/index.js';
 import { createMCPRouter } from '../../src/core/router.js';
 import { setupMCPAssertions, AssertionHelpers } from '../helpers/assertions.js';
 

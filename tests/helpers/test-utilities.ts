@@ -119,7 +119,7 @@ export class TestUtils {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         return await fn();
-      } catch (error) {
+      } catch {
         lastError = error as Error;
 
         if (attempt === maxAttempts) {
@@ -437,7 +437,7 @@ export class PerformanceTestUtils {
       try {
         const { timeMs } = await TestUtils.measureTime(() => fn(load));
         results.push({ load, timeMs, success: true });
-      } catch (error) {
+      } catch {
         results.push({ load, timeMs: 0, success: false });
       }
     }
@@ -496,7 +496,7 @@ export class SecurityTestUtils {
           responseStr.includes('syntax');
 
         results.push({ pattern, vulnerable, response });
-      } catch (error) {
+      } catch {
         // Errors might indicate injection was caught
         results.push({ pattern, vulnerable: false });
       }
@@ -519,7 +519,7 @@ export class SecurityTestUtils {
         const payload = TestUtils.createLargeString(sizeMB);
         const { timeMs } = await TestUtils.measureTime(() => testFn(payload));
         results.push({ sizeMB, timeMs, success: true });
-      } catch (error) {
+      } catch {
         results.push({ sizeMB, timeMs: 0, success: false });
       }
     }

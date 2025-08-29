@@ -7,12 +7,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComprehensiveTestServer, MinimalTestServer } from '../../fixtures/test-servers.js';
 import { createTestClient } from '../../helpers/test-client.js';
 import { setupMCPAssertions, AssertionHelpers } from '../../helpers/assertions.js';
-import { ResultTestUtils, ProtocolTestUtils } from '../../helpers/test-utilities.js';
-import {
-  validResourcesListRequest,
-  validResourcesListResponse,
-  largeResourcesList,
-} from '../../fixtures/mcp-protocol.js';
+import { ResultTestUtils } from '../../helpers/test-utilities.js';
+import {} from '../../fixtures/mcp-protocol.js';
 
 // Setup custom assertions
 setupMCPAssertions();

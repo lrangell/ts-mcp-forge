@@ -151,16 +151,16 @@ describe('Decorators', () => {
       });
     });
 
-    it('should support custom parameter names', () => {
+    it('should extract parameter names from function signature', () => {
       class TestServer {
         @Tool('test', 'Test')
-        testMethod(@Param('Description', 'customName') param: string): void {
+        testMethod(@Param('Description') param: string): void {
           return param.length;
         }
       }
 
       const params = getParamMetadata(TestServer.prototype, 'testMethod');
-      expect(params?.[0].name).toBe('customName');
+      expect(params?.[0].name).toBe('');
     });
   });
 

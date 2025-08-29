@@ -21,7 +21,7 @@ class ToolsCallComplianceServer extends MCPServer {
   @Tool('text-generator', 'Generates text content')
   generateText(
     @Param('Text prompt') prompt: string,
-    @Param('Max length', { required: false }) maxLength?: number
+    @Param('Max length', false) maxLength?: number
   ): Result<string, string> {
     if (!prompt) {
       return err('Prompt is required');
@@ -35,7 +35,7 @@ class ToolsCallComplianceServer extends MCPServer {
   @Tool('image-creator', 'Creates image content')
   createImage(
     @Param('Image description') description: string,
-    @Param('Image format', { required: false }) format?: string
+    @Param('Image format', false) format?: string
   ): Result<object, string> {
     if (!description) {
       return err('Image description is required');
@@ -138,7 +138,7 @@ class ToolsCallComplianceServer extends MCPServer {
   @Tool('error-simulator', 'Simulates various error conditions')
   simulateError(
     @Param('Error type') errorType: string,
-    @Param('Error details', { required: false }) details?: string
+    @Param('Error details', false) details?: string
   ): Result<string, string> {
     switch (errorType) {
       case 'validation':
@@ -210,7 +210,7 @@ class ToolsCallComplianceServer extends MCPServer {
   complexCalculate(
     @Param('Operation') operation: string,
     @Param('Operands') operands: number[],
-    @Param('Options', { required: false }) options?: object
+    @Param('Options', false) options?: object
   ): Result<object, string> {
     if (!operation) {
       return err('Operation is required');

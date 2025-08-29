@@ -88,7 +88,7 @@ class TestCallServer extends MCPServer {
   createObject(
     @Param('Object name') name: string,
     @Param('Object properties as key-value pairs') properties: Record<string, any>,
-    @Param('Include metadata flag', { required: false }) includeMetadata?: boolean
+    @Param('Include metadata flag', false) includeMetadata?: boolean
   ): Result<object, string> {
     if (!name) {
       return err('Name is required');
@@ -176,7 +176,7 @@ class TestCallServer extends MCPServer {
   @Tool('boolean-processor', 'Process boolean values')
   processBoolean(
     @Param('Boolean value') value: boolean,
-    @Param('Invert the boolean', { required: false }) invert?: boolean
+    @Param('Invert the boolean', false) invert?: boolean
   ): Result<boolean, string> {
     if (typeof value !== 'boolean') {
       return err('Value must be a boolean');
@@ -186,9 +186,7 @@ class TestCallServer extends MCPServer {
   }
 
   @Tool('null-handler', 'Handle null and undefined values')
-  handleNull(
-    @Param('Input value that might be null', { required: false }) value?: any
-  ): Result<string, string> {
+  handleNull(@Param('Input value that might be null', false) value?: any): Result<string, string> {
     if (value === null) {
       return ok('Value is null');
     }

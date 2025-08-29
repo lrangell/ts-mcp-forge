@@ -25,13 +25,7 @@ import {
   PromptTemplate,
   ResourceTemplate,
 } from '../../src/decorators/index.js';
-import {
-  PROTOCOL_VERSION,
-  MCP_ERROR_CODES,
-  validToolCallResponse,
-  validResourceReadResponse,
-  validPromptGetResponse,
-} from '../fixtures/mcp-protocol.js';
+import { PROTOCOL_VERSION, MCP_ERROR_CODES } from '../fixtures/mcp-protocol.js';
 
 // Setup custom assertions
 setupMCPAssertions();
@@ -48,7 +42,7 @@ class MCPComplianceTestServer extends MCPServer {
   @Tool('text-processor', 'Process text with various operations')
   processText(
     @Param('Input text to process') text: string,
-    @Param('Processing operation', { required: false }) operation?: string
+    @Param('Processing operation', false) operation?: string
   ): Result<string, Error> {
     if (!text) return err(new Error('Input text is required'));
     switch (operation) {
@@ -195,7 +189,7 @@ class MCPComplianceTestServer extends MCPServer {
   codeReviewPrompt(
     @Param('Programming language') language: string,
     @Param('Code to review') code: string,
-    @Param('Focus area', { required: false }) focus?: string
+    @Param('Focus area', false) focus?: string
   ): Result<object, Error> {
     const focusText = focus ? ` with focus on ${focus}` : '';
     return ok({
@@ -214,7 +208,7 @@ class MCPComplianceTestServer extends MCPServer {
   @Prompt('summarize-text', 'Summarize provided text content')
   summarizePrompt(
     @Param('Text to summarize') text: string,
-    @Param('Summary length', { required: false }) length?: string
+    @Param('Summary length', false) length?: string
   ): Result<object, Error> {
     const lengthInstruction = length ? ` Keep the summary ${length}.` : '';
     return ok({

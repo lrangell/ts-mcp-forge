@@ -1,16 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Result, ok, err } from 'neverthrow';
+import { Result, ok } from 'neverthrow';
 import { MCPServer } from '../../../src/core/server.js';
 import { createMCPRouter } from '../../../src/core/router.js';
-import {
-  Resource,
-  ResourceTemplate,
-  Prompt,
-  Param,
-  DynamicResource,
-  DynamicPrompt,
-} from '../../../src/decorators/index.js';
-import { CompletionResponse, CompletionRequest } from '../../../src/core/protocol.js';
+import { ResourceTemplate, Prompt, Param } from '../../../src/decorators/index.js';
+import { CompletionResponse } from '../../../src/core/protocol.js';
 
 class ContextualCompletionTestServer extends MCPServer {
   constructor() {
@@ -655,22 +648,6 @@ class ContextualCompletionTestServer extends MCPServer {
         suggestion.description?.toLowerCase().includes(queryLower)
     );
   }
-}
-
-// Extended completion request interface for context testing
-interface ContextualCompletionRequest extends Omit<CompletionRequest, 'params'> {
-  params: {
-    ref: {
-      type: 'ref/resource' | 'ref/prompt';
-      uri?: string;
-      name?: string;
-    };
-    argument: {
-      name: string;
-      value: string;
-    };
-    context?: Record<string, string>;
-  };
 }
 
 describe('Contextual Completions', () => {
