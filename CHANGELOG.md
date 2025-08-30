@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.8.0...v0.9.0) (2025-08-30)
+
+### Features
+
+* make @Param optional ([e4792cd](https://github.com/lrangell/ts-mcp-forge/commit/e4792cdd2fd9a56b0d968bc90d74b80638433039))
+
+### Maintenance
+
+* documentation pages ([0d9792c](https://github.com/lrangell/ts-mcp-forge/commit/0d9792ce4ee69661ad10640a8789e9213f58f284))
+* tests ([eb01214](https://github.com/lrangell/ts-mcp-forge/commit/eb01214f528884359293c52bd67fbb9529524261))
+
 ## [0.8.0](https://github.com/lrangell/ts-mcp-forge/compare/v0.7.0...v0.8.0) (2025-08-26)
 
 ### Features
