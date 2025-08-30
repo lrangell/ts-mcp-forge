@@ -52,8 +52,6 @@ lerna-debug.log*
 *.ez
 erl_crash.dump
 
-# Documentation (if auto-generated)
-/docs
 
 # User-specific files
 claude.md

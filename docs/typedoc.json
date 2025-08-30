@@ -1,0 +1,26 @@
+{
+  "entryPoints": ["../src/index.ts", "../src/decorators/index.ts", "../src/core/server.ts"],
+  "tsconfig": "../tsconfig.build.json",
+  "out": "./src/content/docs/api",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "githubPages": false,
+  "readme": "none",
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/tests/**",
+    "**/examples/**"
+  ],
+  "navigationLinks": {
+    "GitHub": "https://github.com/lrangell/ts-mcp-forge",
+    "NPM": "https://www.npmjs.com/package/ts-mcp-forge"
+  },
+  "sidebarLinks": {
+    "Documentation": "/",
+    "API Reference": "/api"
+  }
+}

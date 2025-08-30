@@ -1,0 +1,82 @@
+---
+title: Welcome to TS MCP Forge
+description: A TypeScript framework for building MCP servers with decorators
+template: splash
+hero:
+  tagline: Build powerful MCP servers with TypeScript decorators and type safety
+  actions:
+    - text: Get Started
+      link: /ts-mcp-forge/getting-started/installation/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/lrangell/ts-mcp-forge
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Features
+
+<CardGrid stagger>
+  <Card title="Decorator-Based API" icon="setting">
+    Define tools, resources, and prompts with intuitive TypeScript decorators.
+  </Card>
+  <Card title="Type Safety" icon="approve-check">
+    Automatic type inference and validation using Zod schemas.
+  </Card>
+  <Card title="Error Handling" icon="error">
+    Domain-specific error system with Result types for safe error handling.
+  </Card>
+  <Card title="Dynamic Registration" icon="rocket">
+    Register and unregister resources and prompts at runtime.
+  </Card>
+</CardGrid>
+
+## Quick Example
+
+```typescript
+import { Tool, MCPServer } from 'ts-mcp-forge';
+
+class CalculatorServer extends MCPServer {
+  @Tool()
+  add(a: number, b: number): number {
+    return a + b;
+  }
+
+  @Tool()
+  subtract(a: number, b: number): number {
+    return a - b;
+  }
+}
+
+const server = new CalculatorServer();
+await server.connect(process.stdin, process.stdout);
+```
+
+## Why TS MCP Forge?
+
+- **Simple**: Define your MCP server with decorators and let the framework handle the protocol
+- **Type-Safe**: Full TypeScript support with automatic type inference
+- **Flexible**: Support for tools, resources, prompts, and dynamic registration
+- **Well-Tested**: Comprehensive test coverage including MCP compliance tests
+- **Production-Ready**: Used in production MCP servers
+
+## Next Steps
+
+<CardGrid>
+  <Card title="Installation" icon="download">
+    Learn how to install and set up TS MCP Forge in your project. [Get Started
+    →](/ts-mcp-forge/getting-started/installation/)
+  </Card>
+  <Card title="Quick Start" icon="rocket">
+    Build your first MCP server in minutes. [Quick Start
+    →](/ts-mcp-forge/getting-started/quick-start/)
+  </Card>
+  <Card title="API Reference" icon="document">
+    Explore the complete API documentation. [API Docs →](/ts-mcp-forge/api/readme/)
+  </Card>
+  <Card title="Examples" icon="open-book">
+    See real-world examples of MCP servers. [View Examples →](/ts-mcp-forge/examples/calculator/)
+  </Card>
+</CardGrid>

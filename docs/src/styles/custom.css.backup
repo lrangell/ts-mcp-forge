@@ -1,0 +1,142 @@
+/* Custom styles for TS MCP Forge documentation */
+
+:root {
+  --sl-color-accent-low: #e3f2fd;
+  --sl-color-accent: #2196f3;
+  --sl-color-accent-high: #0d47a1;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #f5f5f5;
+  --sl-color-gray-2: #e0e0e0;
+  --sl-color-gray-3: #bdbdbd;
+  --sl-color-gray-4: #9e9e9e;
+  --sl-color-gray-5: #757575;
+  --sl-color-gray-6: #424242;
+  --sl-color-black: #000000;
+}
+
+/* Dark mode overrides */
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #1565c0;
+  --sl-color-accent: #42a5f5;
+  --sl-color-accent-high: #90caf9;
+}
+
+/* Typography improvements */
+.sl-markdown-content {
+  line-height: 1.7;
+}
+
+/* Code block improvements */
+.sl-markdown-content pre {
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme='dark'] .sl-markdown-content pre {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Card hover effects */
+.card:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* API Reference styling */
+.api-reference h3 {
+  border-bottom: 2px solid var(--sl-color-accent);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Method signature styling */
+.method-signature {
+  font-family: var(--sl-font-mono);
+  background: var(--sl-color-gray-1);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+}
+
+:root[data-theme='dark'] .method-signature {
+  background: var(--sl-color-gray-6);
+}
+
+/* Decorator badge styling */
+.decorator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--sl-color-accent-low);
+  color: var(--sl-color-accent-high);
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+:root[data-theme='dark'] .decorator-badge {
+  background: var(--sl-color-accent-high);
+  color: var(--sl-color-white);
+}
+
+/* Sidebar improvements */
+nav.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-color-gray-3) transparent;
+}
+
+nav.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+nav.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+nav.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--sl-color-gray-3);
+  border-radius: 3px;
+}
+
+nav.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--sl-color-gray-4);
+}
+
+/* Hero section enhancements */
+.hero {
+  background: linear-gradient(135deg, var(--sl-color-accent-low) 0%, var(--sl-color-white) 100%);
+  padding: 3rem 0;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+:root[data-theme='dark'] .hero {
+  background: linear-gradient(135deg, var(--sl-color-gray-6) 0%, var(--sl-color-black) 100%);
+}
+
+/* Table improvements */
+.sl-markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.sl-markdown-content th {
+  background: var(--sl-color-accent-low);
+  font-weight: 600;
+}
+
+:root[data-theme='dark'] .sl-markdown-content th {
+  background: var(--sl-color-gray-6);
+}
+
+.sl-markdown-content td,
+.sl-markdown-content th {
+  padding: 0.75rem;
+  border: 1px solid var(--sl-color-gray-2);
+}
+
+:root[data-theme='dark'] .sl-markdown-content td,
+:root[data-theme='dark'] .sl-markdown-content th {
+  border-color: var(--sl-color-gray-5);
+}

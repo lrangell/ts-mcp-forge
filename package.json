@@ -73,7 +73,11 @@
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "example:calculator": "vite-node -c vite.config.ts examples/calculator/server.ts",
-    "inspect:calculator": "npx @modelcontextprotocol/inspector vite-node -c vite.config.ts examples/calculator/server.ts"
+    "inspect:calculator": "npx @modelcontextprotocol/inspector vite-node -c vite.config.ts examples/calculator/server.ts",
+    "docs:dev": "cd docs && pnpm run dev",
+    "docs:build": "pnpm run build && cd docs && pnpm run build",
+    "docs:preview": "cd docs && pnpm run preview",
+    "docs:check": "cd docs && pnpm run check"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.0",

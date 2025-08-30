@@ -1,0 +1,37 @@
+{
+  "name": "ts-mcp-forge-docs",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "pnpm run format && pnpm run typecheck && pnpm run lint && pnpm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "astro check && tsc --noEmit",
+    "lint": "oxlint . --fix --ignore-path=../.gitignore",
+    "lint:nofix": "oxlint . --ignore-path=../.gitignore"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/starlight": "^0.35.2",
+    "astro": "^5.13.4",
+    "starlight-llms-txt": "^0.6.0",
+    "starlight-markdown": "^0.1.5",
+    "starlight-plugin-icons": "^1.1.1",
+    "starlight-scroll-to-top": "^0.3.1",
+    "starlight-theme-rapide": "^0.5.1",
+    "starlight-typedoc": "^0.21.3",
+    "typedoc": "^0.28.11",
+    "typescript": "^5.9.2"
+  },
+  "devDependencies": {
+    "oxlint": "^1.13.0",
+    "prettier": "^3.6.2"
+  },
+  "packageManager": "pnpm@10.10.0"
+}
